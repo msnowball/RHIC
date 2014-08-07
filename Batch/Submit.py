@@ -72,7 +72,7 @@ def submitPythia():
   
   #Make a directory for this set of jobs and copy necessary files
   curDir = os.getcwd()
-  dirName = opt.PYTHIA_FILE.replace('.C','')
+  dirName = opt.JOB_NAME
   submitDir = curDir+'/'+dirName
   prepareDir(dirName)
   cmd = 'cp {0} {1}'.format(opt.PYTHIA_FILE,dirName)
@@ -81,19 +81,21 @@ def submitPythia():
   processCmd(cmd)
   cmd = 'cp {0} {1}'.format(opt.SUBMIT_FILE,dirName)
   processCmd(cmd)
+  cmd = 'chmod 755 {0}'.format(dirName+'/'+opt.SUBMIT_FILE)
+  processCmd(cmd)
   
   #Get settings for condor
   getCondorSettings()
   #Calculate the number of jobs needed
   nJobs = opt.NEVENTS/float(eventsPerJob_pythia)
   nJobs = int(nJobs)
-  print "Requested {0} events".format(int(opt.NEVENTS))
+  print  "Requested {0:.2e} events".format(int(opt.NEVENTS))
   actualNumbEvents = eventsPerJob_pythia
   if opt.NEVENTS < eventsPerJob_pythia or nJobs == 0:
     nJobs = 1
     actualNumbEvents = opt.NEVENTS
   
-  print "Will run {0} jobs with {1} events each".format(nJobs,actualNumbEvents)
+  print "Will run {0} jobs with {1:.2e} events each".format(nJobs,actualNumbEvents)
 
   #Write out condor file
   jobSettings = {}
@@ -102,7 +104,7 @@ def submitPythia():
     jobSettings['arguments'] = "{0} {1} {2} {3} {4} {5}".format(actualNumbEvents,jobName,submitDir,submitDir+'/output',submitDir+'/log',submitDir+'/err')
     jobSettings['initialdir'] = submitDir
     jobSettings['executable'] = submitDir+'/'+opt.SUBMIT_FILE
-    jobSettings['error'] = submitDir+'/log/'+jobName+'.err'
+    jobSettings['error'] = submitDir+'/err/'+jobName+'.err'
     jobSettings['log'] = submitDir+'/log/'+jobName+'.log'
     settings = collections.OrderedDict(jobSettings)
     writeCondorFile(submitDir,settings,job)
