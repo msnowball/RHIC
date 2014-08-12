@@ -8,6 +8,8 @@ import collections
 #Global variables
 condorSettings = {}
 eventsPerJob_pythia = 1000000
+eventsPerPRDFF = 110000
+runNumber = 368543
 
 def parseOptions():
 
@@ -16,17 +18,19 @@ def parseOptions():
   parser = optparse.OptionParser(usage)
 
   parser.add_option('-b', action='store_true', dest='noX', default=True ,help='no X11 windows')
-  parser.add_option('--submitPythia', action='store_true', dest='SUBMIT_PYTHIA', default=True ,help='Submit Pythia: pass dir')
+  parser.add_option('--submitPythia', action='store_true', dest='SUBMIT_PYTHIA', default=False ,help='Submit Pythia: pass C file with -f')
+  parser.add_option('--submitDST', action='store_true', dest='SUBMIT_DST', default=False ,help='Submit DST: pass PRDF file with --prdf')
 
-  parser.add_option('-f', '--file', dest='PYTHIA_FILE', type='string', default='phpythia_OpenHF.C' ,help='Pythia submission file')
-  parser.add_option('--cfg', dest='PYTHIA_CFG', type='string', default='phpythia_OpenHF.cfg' ,help='Pythia submission file')
+  parser.add_option('-f', '--file', dest='C_FILE', type='string', default='phpythia_OpenHF.C' ,help='.C file')
+  parser.add_option('--cfg', dest='PYTHIA_CFG', type='string', default='phpythia_OpenHF.cfg' ,help='Pythia .cfg file')
+  parser.add_option('--prdf', dest='PRDF_LIST', type='string', default='prdf.txt' ,help='List of PRDFFs')
+
   parser.add_option('--submitFile', dest='SUBMIT_FILE', type='string', default='submitFile.csh' ,help='Executable file')
 
   parser.add_option('-c', '--condor', dest='CONDOR_INPUT', type='string', default='condor.source' ,help='Condor Command File')
-  parser.add_option('-q', '--queue', dest='CONDOR_QUEUE', type='string', default='' ,help='Condor Queue')
   parser.add_option('-p', '--priority', dest='CONDOR_PRIORITY', type='string', default='' ,help='Condor Priority')
-  parser.add_option('-e', '--email', dest='CONDOR_EMAIL', type='string', default='' ,help='Condor Email')
-  parser.add_option('-n', '--nEvents', dest='NEVENTS', type='float', default=1000 ,help='Number of events to produce')
+  parser.add_option('-e', '--email', dest='CONDOR_EMAIL', type='string', default='msnowball@bnl.gov' ,help='Condor Email')
+  parser.add_option('-n', '--nEvents', dest='NEVENTS', type='float', default=1000 ,help='Number of events to produce/per file')
   parser.add_option('-N', '--name', dest='JOB_NAME', type='string', default='pythia' ,help='Job Name')
   
 
@@ -37,12 +41,22 @@ def parseOptions():
 
   # Check that the pythia source file exists
   if opt.SUBMIT_PYTHIA:
-    if not os.path.isfile(opt.PYTHIA_FILE):
-      raise RuntimeError, "{0} does not exist!".format(opt.PYTHIA_FILE)
+    if not os.path.isfile(opt.C_FILE):
+      raise RuntimeError, "{0} does not exist!".format(opt.C_FILE)
     if not os.path.isfile(opt.PYTHIA_CFG):
       raise RuntimeError, "{0} does not exist! Pythia expects a cfg file with the same name as the script.".format(opt.PYTHIA_CFG)
-    if os.path.isdir(opt.PYTHIA_FILE.replace('.C','')):
-      print "Directory {0} exists!".format(opt.PYTHIA_FILE.replace('.C',''))
+    if os.path.isdir(opt.JOB_NAME):
+      print "Directory {0} exists!".format(opt.JOB_NAME)
+      sys.exit()
+
+  # For making DSTs from PRDFFs - Vertex embedding
+  if opt.SUBMIT_DST:
+    if not os.path.isfile(opt.C_FILE):
+      raise RuntimeError, "{0} does not exist!".format(opt.C_FILE)
+    if not os.path.isfile(opt.PRDF_LIST):
+      raise RuntimeError, "{0} does not exist! Need a list of all PRDFFs to run over.".format(opt.PRDF_LIST)
+    if os.path.isdir(opt.JOB_NAME):
+      print "Directory {0} exists!".format(opt.JOB_NAME)
       sys.exit()
 
 
@@ -75,7 +89,7 @@ def submitPythia():
   dirName = opt.JOB_NAME
   submitDir = curDir+'/'+dirName
   prepareDir(dirName)
-  cmd = 'cp {0} {1}'.format(opt.PYTHIA_FILE,dirName)
+  cmd = 'cp {0} {1}'.format(opt.C_FILE,dirName)
   processCmd(cmd)
   cmd = 'cp {0} {1}'.format(opt.PYTHIA_CFG,dirName)
   processCmd(cmd)
@@ -185,6 +199,64 @@ def writeCondorFile(submitDir,jobSettings,jobCounter):
   
 
 
+def submitDST():
+  
+  #Make a directory for this set of jobs and copy necessary files
+  curDir = os.getcwd()
+  dirName = opt.JOB_NAME
+  submitDir = curDir+'/'+dirName
+  prepareDir(dirName)
+  cmd = 'cp {0} {1}'.format(opt.C_FILE,dirName)
+  processCmd(cmd)
+  cmd = 'cp {0} {1}'.format(opt.SUBMIT_FILE,dirName)
+  processCmd(cmd)
+  cmd = 'cp {0} {1}'.format(opt.PRDF_LIST,dirName)
+  processCmd(cmd)
+  cmd = 'chmod 755 {0}'.format(dirName+'/'+opt.SUBMIT_FILE)
+  processCmd(cmd)
+  
+  #Get settings for condor
+  getCondorSettings()
+  #Calculate the number of jobs needed
+  eventsPerJob = opt.NEVENTS
+  jobsPerFile = int(float(eventsPerPRDFF)/eventsPerJob)
+  prdffList = []
+
+  for line in open(opt.PRDF_LIST,'r'):
+    f = line.split()
+    if len(f) < 1: continue
+    if f[0].startswith("#"): continue
+    prdffList.append(f[0])
+    print f[0],"added to list"
+
+
+  nFiles = len(prdffList)
+  nJobs = jobsPerFile*nFiles
+    
+  print "Will run {0} jobs with {1:.2e} events in each DST, on a total of {2} PRDFF files with {3} jobs per file".format(nJobs,eventsPerJob,nFiles,jobsPerFile)
+
+  #Write out condor file
+  jobSettings = {}
+  fileCounter = 0
+  for prdfFile in prdffList:
+    eventsToSkip = 0
+    fileCounter += 1
+    for job in range(jobsPerFile):
+      jobName = opt.JOB_NAME+'_'+str(fileCounter)+'_'+str(job)
+      jobSettings['arguments'] = "{0} {1} {2} {3} {4} {5} {6} {7} {8}".format(eventsPerJob,eventsToSkip,jobName,submitDir,submitDir+'/output',submitDir+'/log',submitDir+'/err',prdfFile, runNumber)
+      jobSettings['initialdir'] = submitDir
+      jobSettings['executable'] = submitDir+'/'+opt.SUBMIT_FILE
+      jobSettings['error'] = submitDir+'/err/'+jobName+'.err'
+      jobSettings['log'] = submitDir+'/log/'+jobName+'.log'
+      settings = collections.OrderedDict(jobSettings)
+      writeCondorFile(submitDir,settings,job)
+      eventsToSkip += eventsPerJob
+
+  
+
+
+
+
 def processCmd(cmd):
     status, output = commands.getstatusoutput(cmd)
     if status !=0:
@@ -199,5 +271,7 @@ if __name__ == "__main__":
 
   if opt.SUBMIT_PYTHIA:
     submitPythia()
+  elif opt.SUBMIT_DST:
+    submitDST()
   
 
