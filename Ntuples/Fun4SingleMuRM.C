@@ -3,11 +3,11 @@
 	mutoo dst analysis loop for mutoo slowsim simulated dst, possibly embeded
 	into either simulated or real data dst
 */
-void Fun4SingleMuAna(const char *inputFile   = "367727_0.root",		
-		     const char *outputFile  = "ana.root"
-		     )
+void Fun4SingleMuRM(const char *inputFile   = "367727_0.root",		
+		    const char *outputFile  = "ana.root"
+		    )
 {
-
+  
   // load libraries
   gSystem->Load("libfun4all.so");
   gSystem->Load("libfun4allfuncs.so");
@@ -42,14 +42,6 @@ void Fun4SingleMuAna(const char *inputFile   = "367727_0.root",
   ///////////////////////////////////////////
   se->run(0);
   se->End();
-
-
-  
-  Fun4AllHistoManager *hm = se->getHistoManager("picodstobject");
-  if( hm ) hm->setOutfileName( outputFile );
-  else cout << " >>> Fun4All - unable to find histoManager" << endl;
-  hm->dumpHistos();
-  
 
   
 }
