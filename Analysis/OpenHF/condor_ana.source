@@ -1,0 +1,10 @@
+Universe      vanilla
+GetEnv        True
+Notification  Error
+email   snowball@rcf.rhic.bnl.gov
+Requirements  CPU_Speed>=1&&Memory>=1024
+Rank          CPU_Speed
+Priority      +10
+Executable    $(Initialdir)/submitFileAna.sh
+Experiment    phenix
+Job_Type      cas
