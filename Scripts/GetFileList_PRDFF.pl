@@ -52,6 +52,7 @@ if ($ARGV[0] =~ m/.txt/)
     while (<DATA>){
 	if ($_ != "")
 	{
+	    chomp;
 	    push(@runList,$_);
 	}
     }
