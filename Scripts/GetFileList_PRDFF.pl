@@ -6,7 +6,7 @@ use DBI;
 $RUN="PP510Run12";
 $MINRUN=364808;
 $HPSSDIR="/home/phnxsink/run12/eventdata/";
-$DOWNLOADDIR="/direct/phenix+hhj2/snowball/PRDF/";
+$DOWNLOADDIR=$ARGV[1];
 $MINEVENTSPERFILE=100000;
 ###############################
 
@@ -30,9 +30,9 @@ $dbh->{LongReadLen}=2000; # full file paths need to fit in here
 
 push(@filetype,"PRDFF");
 
-if ( $#ARGV + 1 < 1 ||  $#ARGV + 1 > 1 ) 
+if ( $#ARGV + 1 < 2 ||  $#ARGV + 1 > 2 ) 
 {
-    print "usage: GetFileList_PRDFF.pl <RunNumber or List.txt>\n" ;
+    print "usage: GetFileList_PRDFF.pl <RunNumber or List.txt> </path/to/download/file/to> \n" ;
     print "possible run numbers from RUN='$RUN',RUNTYPE=PHYSICS with more than 30K events \n";
     $getrunnumbers = $dbh->prepare("select run.runnumber from run, trigger where run.partitionname='Big' and run.triggerconfig like '$RUN' and run.runtype='PHYSICS' and run.loggingon!='NO' and run.eventsinrun>30000 and run.runnumber>='$MINRUN' and run.runnumber=trigger.runnumber and (trigger.name='ZDCLL1wide' or trigger.bitnb=0)");
     $getrunnumbers->execute();
