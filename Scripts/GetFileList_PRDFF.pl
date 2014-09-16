@@ -5,9 +5,9 @@ use DBI;
 ###########SETTINGS############
 $RUN="PP510Run12";
 $MINRUN=364808;
-$HPSSDIR="/home/phnxsink/run12/eventdata/";
+$HPSSDIR="/home/phnxsink/run12/eventdata";
 $DOWNLOADDIR=$ARGV[1];
-$MINEVENTSPERFILE=100000;
+$MINEVENTSPERFILE=180000;
 ###############################
 
 
