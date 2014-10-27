@@ -1,0 +1,19 @@
+Initialdir     = /direct/phenix+scratch/snowball/SpinAnalysis/firstBuild/RECO/Combined_SignalEmbedding/test 
+Requirements  =  CPU_Speed>=1&&Memory>=1024 
+Universe      =  vanilla 
++Job_Type      = "cas" 
+Rank          =  CPU_Speed 
+GetEnv        =  True 
+Priority      =  +10 
++Experiment    = "phenix" 
+Notification  =  Error 
+Notify_user   =  snowball@rcf.rhic.bnl.gov 
+
+
+Executable     = $(Initialdir)/submitFile.csh 
+Log            = /direct/phenix+scratch/snowball/SpinAnalysis/firstBuild/RECO/Combined_SignalEmbedding/test/log/test_0.log 
+Arguments      = 0 /direct/phenix+user08/snowball/storage/MonteCarlo/SIM/test/test_bbbar_1.root test_0 /direct/phenix+scratch/snowball/SpinAnalysis/firstBuild/RECO/Combined_SignalEmbedding/test /direct/phenix+scratch/snowball/SpinAnalysis/firstBuild/RECO/Combined_SignalEmbedding/test/output /direct/phenix+scratch/snowball/SpinAnalysis/firstBuild/RECO/Combined_SignalEmbedding/test/log /direct/phenix+scratch/snowball/SpinAnalysis/firstBuild/RECO/Combined_SignalEmbedding/test/err 
+Error          = /direct/phenix+scratch/snowball/SpinAnalysis/firstBuild/RECO/Combined_SignalEmbedding/test/err/test_0.err 
+Queue
+
+
