@@ -1,0 +1,26 @@
+AC_INIT(configure.in)
+
+AM_INIT_AUTOMAKE(PHHepMCAll, 0.1)
+
+AC_PROG_CXX(CXX g++)
+AC_PROG_CC(g++)
+AC_ENABLE_STATIC(no)
+AC_PROG_LIBTOOL
+
+
+ROOTLIBS=`root-config --libs`
+ROOTINC=`root-config --incdir`
+AC_SUBST(ROOTLIBS)
+AC_SUBST(ROOTINC)
+
+HEPMCLIB='-lHepMC'
+AC_SUBST(HEPMCLIB)
+
+dnl   no point in suppressing warnings people should
+dnl   at least see them, so here we go for g++: -Wall
+if test $ac_cv_prog_gxx = yes; then
+   CXXFLAGS="$CXXFLAGS -Wall -Werror"
+fi
+
+AC_OUTPUT(Makefile)
+
