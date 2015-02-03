@@ -75,7 +75,7 @@ class anaClass:
         self.ZVar = 'Evt_bbcZ'
         self.dNdZ_low_pT = 1
         self.dNdZ_high_pT = 5
-        self.dNdZ_pT_step = 0.25 
+        self.dNdZ_pT_step = 0.5 
         self.dNdZ_pT_NStep = 0
 
         self.dNdZ_NBins = 12
@@ -91,7 +91,9 @@ class anaClass:
         self.dNdZ_LG3Cuts_S = 'SingleMuons.lastgap==3&&SingleMuons.ntrhits>=12&&SingleMuons.rapidity<0&&SingleMuons.DG0<20&&SingleMuons.trchi2<5'
         self.dNdZ_LG4Cuts_S = 'SingleMuons.lastgap==4&&SingleMuons.ntrhits>=12&&SingleMuons.rapidity<0&&SingleMuons.DG0<20&&SingleMuons.trchi2<5'
 
-        for i in xrange(self.dNdZ_low_pT,self.dNdZ_high_pT+self.dNdZ_pT_step,self.dNdZ_pT_step):
+        i=self.dNdZ_low_pT
+        while i <= self.dNdZ_high_pT:
+            i+=self.dNdZ_pT_step
             self.dNdZ_pT_NStep += 1
             self.dNdZ_lowpTCut.append(i)
             self.dNdZ_highpTCut.append(i+self.dNdZ_pT_step)
@@ -227,7 +229,7 @@ class anaClass:
 
         #dN/dZ
         ###############################################################################
-        for i in range(self.dNdZ_pT_NStep+1)
+        for i in range(self.dNdZ_pT_NStep):
             theName="dNdZ_pT_{0:.2}_{1:.2}_LG3_N".format(self.dNdZ_lowpTCut[i],self.dNdZ_highpTCut[i])
             self.addHist1D(theName,";Z (cm); dN/dZ",self.ZVar,self.dNdZ_NBins,self.dNdZ_Zmin,self.dNdZ_Zmax,self.dNdZ_LG3Cuts_N)
             
