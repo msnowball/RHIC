@@ -16,9 +16,9 @@ def parseOptions():
 
   parser.add_option('-b', action='store_true', dest='noX', default=True ,help='no X11 windows')
   parser.add_option('--submitHists',action='store_true', dest='SUBMIT_HISTS', default=True ,help='Submit hists')
-  parser.add_option('-n', '--nFiles', dest='FILES_PER_JOB', type='int', default=10 ,help='N Files Per Job (def:10)')
+  parser.add_option('-n', '--nFiles', dest='FILES_PER_JOB', type='int', default=20 ,help='N Files Per Job (def:10)')
   parser.add_option('-N', '--name', dest='JOB_NAME', type='string', default='' ,help='Job Name (def:)')
-  parser.add_option('--submitFile', dest='SUBMIT_FILE', type='string', default='submitFile.sh' ,help='Submit file (def:submitFile.sh)')
+  parser.add_option('--submitFile', dest='SUBMIT_FILE', type='string', default='submitFile.csh' ,help='Submit file (def:submitFile.sh)')
   parser.add_option('-c', '--condor', dest='CONDOR_INPUT', type='string', default='condor.source' ,help='Condor input settings (def:condor.source)')
   
   # store options and arguments as global variables
@@ -45,13 +45,14 @@ def prepareDir(dirName):
 def getCondorSettings():
   
   #All settings needed
-  condorKeyWords = ['universe','getenv','notification','email','requirements','rank','priority','executable','experiment','job_type']
+  condorKeyWords = ['universe','getenv','notification','email','requirements','request_memory','rank','priority','executable','experiment','job_type']
   #Set some defaults in case the source file is missing
   condorSettings['universe']     = "vanilla"
   condorSettings['getenv']       = "True"
   condorSettings['notification'] = "Error"
   condorSettings['email']        = "snowball@rcf.rhic.bnl.gov"
-  condorSettings['requirements'] = "CPU_Speed >= 1 && Memory >= 1024"
+  condorSettings['requirements'] = "CPU_Speed >= 1"
+  condorSettings['request_memory'] = "1024"
   condorSettings['rank']         = "CPU_Speed"
   condorSettings['priority']     = "+20"
   condorSettings['executable']   = "$(InitialDir)/"+opt.SUBMIT_FILE
@@ -90,9 +91,10 @@ def writeCondorFile(submitDir,jobSettings,jobCounter):
   condorStartLine['Notify_user']  = "Notify_user   =  {0} ".format(condorSettings['email'])
   condorStartLine['Initialdir']   = "Initialdir     = {0} ".format(jobSettings['initialdir'])
   condorStartLine['Requirements'] = "Requirements  =  {0} ".format(condorSettings['requirements'])
+  condorStartLine['request_memory'] = "request_memory  =  {0} ".format(condorSettings['request_memory'])
   condorStartLine['Rank']         = "Rank          =  {0} ".format(condorSettings['rank'])
   condorStartLine['Priority']     = "Priority      =  {0} ".format(condorSettings['priority'])
-  condorStartLine['Experiment']   = "+Experiment    = \"{0}\" ".format(condorSettings['experiment'])
+  #condorStartLine['Experiment']   = "+Experiment    = \"{0}\" ".format(condorSettings['experiment'])
   condorStartLine['Job_Type']     = "+Job_Type      = \"{0}\" ".format(condorSettings['job_type'])
   
 
@@ -123,6 +125,8 @@ def submitHists():
   cmd = 'cp {0} {1}'.format('makeAna.py',dirName)
   processCmd(cmd)
   cmd = 'cp {0} {1}'.format('anaClass.py',dirName)
+  processCmd(cmd)
+  cmd = 'cp {0} {1}'.format('copyFromDcache.sh',dirName)
   processCmd(cmd)
   cmd = 'cp {0} {1}'.format(opt.SUBMIT_FILE,dirName)
   processCmd(cmd)
