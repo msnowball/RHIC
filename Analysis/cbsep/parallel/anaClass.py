@@ -72,7 +72,7 @@ class anaClass:
         
         #dNdZ
         ###########################################
-        self.ZVar = 'Evt_bbcZ'
+        self.ZVar = 'SingleMuons.z0_fvtxmutr'
         self.dNdZ_low_pT = 1
         self.dNdZ_high_pT = 5
         self.dNdZ_pT_step = 0.5 
@@ -85,11 +85,11 @@ class anaClass:
         self.dNdZ_lowpTCut = []
         self.dNdZ_highpTCut = []
 
-        self.dNdZ_LG3Cuts_N = 'SingleMuons.lastgap==3&&SingleMuons.ntrhits>=12&&SingleMuons.rapidity>0&&SingleMuons.DG0<15&&SingleMuons.trchi2<5'
-        self.dNdZ_LG4Cuts_N = 'SingleMuons.lastgap==4&&SingleMuons.ntrhits>=12&&SingleMuons.rapidity>0&&SingleMuons.DG0<15&&SingleMuons.trchi2<5'
+        self.dNdZ_LG3Cuts_N = 'SingleMuons.lastgap==3&&SingleMuons.ntrhits>=12&&SingleMuons.rapidity>0&&SingleMuons.DG0<15&&SingleMuons.trchi2<5&&SingleMuons.nhits_fvtx>2'
+        self.dNdZ_LG4Cuts_N = 'SingleMuons.lastgap==4&&SingleMuons.ntrhits>=12&&SingleMuons.rapidity>0&&SingleMuons.DG0<15&&SingleMuons.trchi2<5&&SingleMuons.nhits_fvtx>2'
 
-        self.dNdZ_LG3Cuts_S = 'SingleMuons.lastgap==3&&SingleMuons.ntrhits>=12&&SingleMuons.rapidity<0&&SingleMuons.DG0<20&&SingleMuons.trchi2<5'
-        self.dNdZ_LG4Cuts_S = 'SingleMuons.lastgap==4&&SingleMuons.ntrhits>=12&&SingleMuons.rapidity<0&&SingleMuons.DG0<20&&SingleMuons.trchi2<5'
+        self.dNdZ_LG3Cuts_S = 'SingleMuons.lastgap==3&&SingleMuons.ntrhits>=12&&SingleMuons.rapidity<0&&SingleMuons.DG0<20&&SingleMuons.trchi2<5&&SingleMuons.nhits_fvtx>2'
+        self.dNdZ_LG4Cuts_S = 'SingleMuons.lastgap==4&&SingleMuons.ntrhits>=12&&SingleMuons.rapidity<0&&SingleMuons.DG0<20&&SingleMuons.trchi2<5&&SingleMuons.nhits_fvtx>2'
 
         i=self.dNdZ_low_pT
         while i <= self.dNdZ_high_pT:
@@ -122,6 +122,7 @@ class anaClass:
 
     def doAnalysis(self):
 
+        print ">>>> Doing Analysis"
         self.getTree()
 
         #Providence info tracking
@@ -142,7 +143,8 @@ class anaClass:
         self.addHist1D("mu_pT_nHitsgte14",";pT (GeV); N Muons",self.pTVar,30,0,15,self.looseCutVal+"&&SingleMuons.ntrhits>=14")
 
         self.addHist2D("chi2_vs_LG",";Last Gap; #chi^{2}","SingleMuons.lastgap",4,0,4,"SingleMuons.chi2_fvtxmutr",50,0,25,self.veryLooseCutVal)
-
+        
+        print ">> kin hists done"
         #########################################################
         dName = "DCA"
         dPhiName = "DCA_phi"
@@ -178,7 +180,7 @@ class anaClass:
             self.hists1D[dcaPhiName] = hist2
 
 
-
+        print ">> DCA hists done"
         #Stopped Hadrons
         ###########################################################################
         self.addHist1D("SH_mu_pT",";pT (GeV); N Muons",self.pTVar,self.kNpTbins,self.kpTMin,self.kpTMax,self.cutValueSH)
@@ -227,25 +229,26 @@ class anaClass:
 
 
 
+        print ">> SH DCA hists done"
         #dN/dZ
         ###############################################################################
         for i in range(self.dNdZ_pT_NStep):
             theName="dNdZ_pT_{0:.2}_{1:.2}_LG3_N".format(self.dNdZ_lowpTCut[i],self.dNdZ_highpTCut[i])
-            self.addHist1D(theName,";Z (cm); dN/dZ",self.ZVar,self.dNdZ_NBins,self.dNdZ_Zmin,self.dNdZ_Zmax,self.dNdZ_LG3Cuts_N)
+            self.addHist1D(theName,";Z (cm); dN/dZ",self.ZVar,self.dNdZ_NBins,self.dNdZ_Zmin,self.dNdZ_Zmax,self.dNdZ_LG3Cuts_N+'&&'+self.pTVar+'>'+str(self.dNdZ_lowpTCut[i])+'&&'+self.pTVar+'<'+str(self.dNdZ_highpTCut[i]))
             
             theName="dNdZ_pT_{0:.2}_{1:.2}_LG4_N".format(self.dNdZ_lowpTCut[i],self.dNdZ_highpTCut[i])
-            self.addHist1D(theName,";Z (cm); dN/dZ",self.ZVar,self.dNdZ_NBins,self.dNdZ_Zmin,self.dNdZ_Zmax,self.dNdZ_LG4Cuts_N)
+            self.addHist1D(theName,";Z (cm); dN/dZ",self.ZVar,self.dNdZ_NBins,self.dNdZ_Zmin,self.dNdZ_Zmax,self.dNdZ_LG4Cuts_N+'&&'+self.pTVar+'>'+str(self.dNdZ_lowpTCut[i])+'&&'+self.pTVar+'<'+str(self.dNdZ_highpTCut[i]))
 
             theName="dNdZ_pT_{0:.2}_{1:.2}_LG3_S".format(self.dNdZ_lowpTCut[i],self.dNdZ_highpTCut[i])
-            self.addHist1D(theName,";Z (cm); dN/dZ",self.ZVar,self.dNdZ_NBins,self.dNdZ_Zmin,self.dNdZ_Zmax,self.dNdZ_LG3Cuts_S)
+            self.addHist1D(theName,";Z (cm); dN/dZ",self.ZVar,self.dNdZ_NBins,self.dNdZ_Zmin,self.dNdZ_Zmax,self.dNdZ_LG3Cuts_S+'&&'+self.pTVar+'>'+str(self.dNdZ_lowpTCut[i])+'&&'+self.pTVar+'<'+str(self.dNdZ_highpTCut[i]))
             
             theName="dNdZ_pT_{0:.2}_{1:.2}_LG4_S".format(self.dNdZ_lowpTCut[i],self.dNdZ_highpTCut[i])
-            self.addHist1D(theName,";Z (cm); dN/dZ",self.ZVar,self.dNdZ_NBins,self.dNdZ_Zmin,self.dNdZ_Zmax,self.dNdZ_LG4Cuts_S)
+            self.addHist1D(theName,";Z (cm); dN/dZ",self.ZVar,self.dNdZ_NBins,self.dNdZ_Zmin,self.dNdZ_Zmax,self.dNdZ_LG4Cuts_S+'&&'+self.pTVar+'>'+str(self.dNdZ_lowpTCut[i])+'&&'+self.pTVar+'<'+str(self.dNdZ_highpTCut[i]))
         
 
 
 
-
+        print ">> dN/dZ hists done"
         #Write Hists 
         ###############################################################################
         fOut = ROOT.TFile(self.outputFile,"RECREATE")
