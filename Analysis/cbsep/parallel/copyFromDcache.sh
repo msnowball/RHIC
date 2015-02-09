@@ -32,12 +32,30 @@ function copy()
 }
 
 
+function check()
+{
+    if [[ $1 == "" ]]; then return 2; fi
+
+    env DCACHE_DOOR=phnxdoor1.rcf.bnl.gov:22133 dc_check $1
+    return $?
+    
+}
+
+
+
 
 for i in $(cat $LIST); do
     
-    echo "Copying $i..."
-    copy $i
     
+    check $i
+    CODE=$?
+    if [[ $CODE == 0 ]]; then
+	echo "Copying $i..."
+	copy $i
+    else
+	echo "Check for $i failed, skipping..."
+    fi
+
 done
 
 exit 0
