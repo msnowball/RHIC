@@ -9,21 +9,26 @@ set ERR_DIR = ${SUBMIT_DIR}/err
 set LOG_FILE = ${NAME}_log.out
 set OUT_FILE = ${NAME}_hists.root
 
+setenv DCACHE_DOOR phnxdoor1.rcf.bnl.gov:22133
+
 source $HOME/.cshrc
 #source /opt/phenix/bin/phenix_setup.csh
 cd $HOME/disks/hhj/local/root-32bit/INSTALL/bin
 source thisroot.csh
 cd -
-# set tempdir = $_CONDOR_SCRATCH_DIR/${NAME}
-set tempdir = tmp/${NAME}
+set tempdir = $_CONDOR_SCRATCH_DIR/${NAME}
+#set tempdir = tmp/${NAME}
 mkdir -p ${tempdir}
 
 cp ${SUBMIT_DIR}/*.py ${tempdir}
 cp ${LIST} ${tempdir}
+cp copyFromDcache.sh ${tempdir}
+
+cd ${tempdir}
 set NEWLIST = `basename ${LIST}`
 bash copyFromDcache.sh $NEWLIST ${tempdir} |& tee -a $LOG_FILE
 
-cd ${tempdir}
+
 
 echo "-------------------------------------" |& tee -a $LOG_FILE
 echo "Job started at `date` on $HOST" |&tee -a $LOG_FILE
