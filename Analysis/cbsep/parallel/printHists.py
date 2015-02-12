@@ -54,10 +54,8 @@ if __name__ == "__main__":
   logString = ''
 
   if opt.LOGX: 
-    ROOT.gPad.SetLogx()
     logString += '_logx'
   if opt.LOGY:
-    ROOT.gPad.SetLogy()
     logString += '_logy'
 
   tfile = ROOT.TFile(opt.FILE,"READ")
@@ -76,6 +74,14 @@ if __name__ == "__main__":
         drawOpt = opt.drawOpt3D
 
       hist.Draw(drawOpt)
+      if opt.LOGX:
+        c.SetLogx()
+        c.Modified()
+        c.Update()
+      if opt.LOGY:
+        c.SetLogy()
+        c.Modified()
+        c.Update()
       c.SaveAs(opt.OUTPUT_DIR+'/'+hist.GetName()+logString+'.eps')
       c.SaveAs(opt.OUTPUT_DIR+'/'+hist.GetName()+logString+'.png')
       c.SaveAs(opt.OUTPUT_DIR+'/'+hist.GetName()+logString+'.pdf')
