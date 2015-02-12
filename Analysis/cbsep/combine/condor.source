@@ -1,0 +1,10 @@
+Universe      vanilla
+GetEnv        True
+Notification  Error
+email   snowball@rcf.rhic.bnl.gov
+Requirements  CPU_Speed>=1
+request_memory 1024
+Rank          CPU_Speed
+Priority      +10
+Executable    $(Initialdir)/submitFile.csh
+Job_Type      cas
