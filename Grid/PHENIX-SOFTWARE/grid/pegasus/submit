@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -e
+
+# generate the dax and site catalog
+export PYTHONPATH=`pegasus-config --python`
+
+EXISTS=FALSE
+i=1
+while [ $EXISTS == "FALSE" ]
+do
+    SUBMIT_DIR=submission_$i
+    if [ -d $SUBMIT_DIR ]; then 
+	let i=$i+1
+    else
+	mkdir -p $SUBMIT_DIR 
+	EXISTS=TRUE
+    fi
+done
+
+
+# plan and submit the  workflow
+pegasus-plan \
+    --conf pegasusrc \
+    --sites condorpool \
+    --dir $PWD \
+    --relative-submit-dir $SUBMIT_DIR \
+    --output-site local \
+    --dax dax.xml \
+    --submit
+

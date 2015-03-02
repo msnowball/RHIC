@@ -1,0 +1,146 @@
+#!/bin/bash
+
+set -e
+
+if [[ $1 == "-h" || $1 == "--help" ]]; then 
+
+cat <<EOF    
+Usage: phnxgrid-condor [options] 
+phnxgrid-condor -h for help
+** edit this file to suit your workflow **
+** if you do not pass '-submit', then the workflow will only be created and not submitted **
+
+Options:
+  -h, --help            show this help message and exit
+  -go,-submit           submit jobs
+  -N, --name            job name
+  -n, --njobs           number of jobs to submit
+
+EOF
+exit
+fi
+
+SUBMIT=FALSE
+if [[ $1 == "-submit" ]]; then SUBMIT=TRUE; shift; fi
+if [[ $1 == "--submit" ]]; then SUBMIT=TRUE; shift; fi
+if [[ $1 == "-go" ]]; then SUBMIT=TRUE; shift; fi
+if [[ $1 == "--go" ]]; then SUBMIT=TRUE; shift; fi
+if [[ $1 == "-n" || $1 == "--njobs" ]]; then NNJOBS=$2; shift; shift; fi 
+if [[ $1 == "-N" || $1 == "--name" ]]; then JJOB_NAME=$2; shift; shift; fi 
+
+
+#############################################################################
+# RUN THIS IN THE PHSWBASE DIRECTORY
+CERTPATH=`voms-proxy-info -path`
+CERTFILE=`basename $CERTPATH`
+
+MAX_WALL_TIME=12 #hours
+MAX_JOBS_RELEASED=10
+JOB_NAME=test
+NJOBS=10
+
+EXECUTABLE=grid/PHSW.sh
+ARGUMENTS="-cert $CERTFILE"
+#COMMA DELIMITED
+INPUT_FILES="$CERTPATH"
+
+#############################################################################
+if [[ $NNJOBS != "" && $NNJOBS != $NJOBS ]]; then
+    echo "Requested $NNJOBS by command line and $NJOBS in the script! Using $NNJOBS from command line..."
+    NJOBS=$NNJOBS
+fi
+
+if [[ $JJOB_NAME != "" && $JJOB_NAME != $JOB_NAME ]]; then
+    echo "Requested job name $JJOB_NAME by command line and $JOB_NAME in the script! Using $JJOB_NAME from command line..."
+    JOB_NAME=$JJOB_NAME
+fi
+
+
+if [[ ! -f $EXECUTABLE ]]; then 
+    echo "Could not find $EXECUTABLE, exiting..."
+    exit 1
+fi
+
+
+#CERT
+CERT_TIME_LEFT=`voms-proxy-info -timeleft`
+MAX_TIME=$(echo "$MAX_WALL_TIME*60*60" | bc)
+if [[ $CERT_TIME_LEFT < $MAX_TIME ]]; then 
+    echo "Please renew your certificate, not enough valid time left for jobs! (voms-proxy-init -hours 172)"
+    exit
+fi
+
+
+
+#JOB ID INFO
+JOB_ID=${JOB_NAME}_`/bin/date +'%m%d_%H-%M'`
+if [[ $PHSWBASE_FULL == "" ]]; then PHSWBASE=`basename $PWD`; PHSWBASE_FULL=$PWD; fi
+JOB_DIR=$PHSWBASE_FULL/jobs/$JOB_ID
+
+#SET UP DIRECTORIES
+TOP_DIR=`pwd`
+DAG_DIR=$JOB_DIR/dag
+MASTER_DAG=$DAG_DIR/master.dag
+#LOG_DIR=$JOB_DIR/log
+BIN_DIR=$JOB_DIR/bin
+echo
+echo "Job dir is $JOB_DIR"
+echo
+mkdir -p $BIN_DIR
+#mkdir -p $LOG_DIR
+mkdir -p $DAG_DIR
+cp $EXECUTABLE $BIN_DIR
+EXECUTABLE=`basename $EXECUTABLE`
+
+#LOOP OVER NJOBS, CREATE CONDOR AND MASTER DAG FILES
+for (( N=1; N <= $NJOBS; N++ )); do
+
+    RETURN_DIR=$JOB_DIR/${JOB_NAME}_$N
+    mkdir -p $RETURN_DIR
+    cp $BIN_DIR/$EXECUTABLE $RETURN_DIR
+    cat >$RETURN_DIR/${JOB_NAME}_${N}.condor <<EOF
+universe        = vanilla
+
+# requirements is an expression to specify machines that can run jobs
+requirements    = (FileSystemDomain != "") && ((Arch == "INTEL") || (Arch == "X86_64")) && ((TARGET.GLIDEIN_ToRetire - time()) >= ($MAX_WALL_TIME*60*60)) && (CVMFS_oasis_opensciencegrid_org_REVISION >= 3192) && (HAS_PHSW == True)
+
+# make sure the job is being retried and rematched
+periodic_release = (NumJobStarts < $MAX_JOBS_RELEASED) && ((CurrentTime - EnteredCurrentStatus) > (60*60))
+
+# protect against hung jobs
+periodic_hold =  (JobStatus==2) && ((CurrentTime - EnteredCurrentStatus) > ($MAX_WALL_TIME*60*60))
+
+# stay in queue on failures
+on_exit_hold = (ExitBySignal == True) || (ExitCode != 0)
+
+executable = $EXECUTABLE
+arguments = $ARGUMENTS
+
+should_transfer_files = YES
+WhenToTransferOutput = ON_EXIT
+
+transfer_input_files = $INPUT_FILES
+
+output = $RETURN_DIR/job.out
+error = $RETURN_DIR/job.err
+log = $RETURN_DIR/job.log
+
+notification = NEVER
+
++ProjectName = "BNL-PHENIX"
+
+queue
+EOF
+
+    #DAG
+    echo "" >> $MASTER_DAG
+    echo "JOB    ${JOB_NAME}_${N} ${RETURN_DIR}/${JOB_NAME}_${N}.condor" >> $MASTER_DAG
+    echo "RETRY  ${JOB_NAME}_${N} 3" >> $MASTER_DAG
+   
+done
+
+
+#SUBMIT JOBS 
+if [[ $SUBMIT == "TRUE" ]]; then condor_submit_dag -notification Always -maxidle 200 $MASTER_DAG; fi
+
+

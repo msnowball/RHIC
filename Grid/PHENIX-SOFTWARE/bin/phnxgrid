@@ -1,0 +1,143 @@
+#!/usr/bin/python   
+import sys, os, pwd, commands
+import optparse, shlex, re
+import math
+from array import array
+import collections, random
+import tarfile
+condorSettings = {}
+
+_debug_ = False
+
+def parseOptions():
+
+  usage = ('usage: %prog [options] ReleaseName \n'
+           + '%prog creates a new PHSW release directory for submitting grid jobs\n'
+           + '%prog -h for help')
+  parser = optparse.OptionParser(usage)
+
+  parser.add_option('-b', action='store_true', dest='noX', default=True ,help='no X11 windows')
+  parser.add_option('--pack', action='store_true', dest='PACK', default=False , help='Pack the libs directory for job submission')
+  #parser.add_option('-c','--condor', action='store_true', dest='CONDOR', default=False , help='Prepare release for condor-type workflow (copies necessary scripts)')
+  #parser.add_option('-p','--pegasus', action='store_true', dest='PEGASUS', default=False , help='Prepare release for pegasus-type workflow (copies necessary scripts)')
+
+
+  global opt, args
+  (opt, args) = parser.parse_args()
+
+  #Check to see if release with that name already exists
+  if not opt.PACK:
+    if os.path.exists(args[0]): 
+      raise RuntimeError, "Directory {0} exists already!".format(args[0])
+    else:
+      opt.JOB_NAME = args[0]
+    #if not os.environ.get('PHSWBASE'):
+    #  print "Setting env variable PHSWBASE = {0}".format(opt.JOB_NAME)
+    #else:
+    #  print "Overwriting env variable PHSWBASE with new directory = {0}".format(opt.JOB_NAME)
+    #os.environ['PHSWBASE'] = opt.JOB_NAME
+    #os.environ['PHSWBASE_FULL'] = os.getcwd()+'/'+opt.JOB_NAME
+
+  
+
+
+
+
+
+
+
+def prepareDir(dirName):
+
+  print "New release {0}".format(dirName)
+  cmd = 'mkdir -p {0}'.format(dirName)
+  processCmd(cmd)
+  cmd = 'mkdir -p {0}'.format(dirName+'/grid')
+  processCmd(cmd)
+  cmd = 'mkdir -p {0}'.format(dirName+'/lib')
+  processCmd(cmd)
+  cmd = 'mkdir -p {0}'.format(dirName+'/src')
+  processCmd(cmd)
+  cmd = 'mkdir -p {0}'.format(dirName+'/include')
+  processCmd(cmd)
+  cmd = 'mkdir -p {0}'.format(dirName+'/bin')
+  processCmd(cmd)
+  cmd = 'mkdir -p {0}'.format(dirName+'/data')
+  processCmd(cmd)
+  cmd = 'mkdir -p {0}'.format(dirName+'/pack')
+  processCmd(cmd)
+
+  gridDir = os.environ['PHSW_GRID_DIR']
+  if gridDir == "":
+    raise RuntimeError, "PHSW_GRID_DIR is empty!"
+  cmd = 'cp -r {0}/* {1}/grid/'.format(gridDir,dirName)
+  processCmd(cmd)
+
+
+def processCmd(cmd):
+    status, output = commands.getstatusoutput(cmd)
+    if status !=0:
+        print 'Error in processing command:\n   ['+cmd+'] \nExiting...'
+        sys.exit()
+
+
+
+def cpPegFiles():
+  cmd = "cp {0} {1}".format('',opt.JOB_NAME+'/dax-generator.py')
+  processCmd(cmd)
+
+
+
+def copyLibs():
+  
+  print ">>> Copying libs"
+  for line in open(opt.LIBS_FILE,'r'):
+    f = line.split()
+    if len(f) < 1: continue
+    if f[0].startswith("#"): continue
+    if (f[0].endswith('.so') or f[0].endswith('.a') or f[0].endswith('.lo')):
+      cmd = 'cp {0} {1}/'.format(f[0],opt.JOB_NAME+'/lib')
+    else:
+      cmd = 'cp -r {0}/* {1}/'.format(f[0],opt.JOB_NAME+'/lib')
+    processCmd(cmd)
+    print f[0]
+
+def copyData():
+  
+  print ">>> Copying data"
+  for line in open(opt.DATA_FILE,'r'):
+    f = line.split()
+    if len(f) < 1: continue
+    if f[0].startswith("#"): continue
+    cmd = 'cp -r {0}/* {1}/'.format(f[0],opt.JOB_NAME+'/data')
+    processCmd(cmd)
+    print f[0]
+
+
+def compress(aDir):
+
+  print ">>> Compressing "+aDir
+  tar = tarfile.open(aDir+".tar.gz", "w:gz")
+  if(_debug_): tar.debug=3
+  for cfile in os.listdir(aDir):
+    if(_debug_): print cfile
+    tar.add(aDir+'/'+cfile)
+  tar.close()
+  cmd = "mv "+aDir+".tar.gz pack"
+  processCmd(cmd)
+  print ">>> Done"
+
+
+
+
+
+
+
+if __name__ == "__main__":
+  parseOptions()
+
+  if opt.PACK:
+    compress('lib')
+    #compress('bin')
+  else:
+    prepareDir(opt.JOB_NAME)
+    

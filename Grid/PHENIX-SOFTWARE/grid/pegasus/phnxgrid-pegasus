@@ -1,0 +1,235 @@
+#!/usr/bin/env python
+
+from Pegasus.DAX3 import *
+import sys, os, time, pwd
+import optparse, shlex, re, commands
+import math, collections, random, subprocess
+from array import array
+
+inputFilesLFN = []
+inputFilesPFN = []
+inputFilesFN = []
+
+def parseOptions():
+
+  usage = ('usage: %prog [options] \n'
+           + '** edit this file (writeDax function) to suit your workflow ** \n'
+           + '%prog -h for help')
+  parser = optparse.OptionParser(usage)
+
+
+  parser.add_option('-b', action='store_true', dest='noX', default=True ,help='no X11 windows')
+  parser.add_option('-n','--njobs', dest='NJOBS',type='int' , default=10 ,help='Number of jobs')
+  parser.add_option('-N','--name', dest='JOB_NAME',type='string' , default='test' ,help='Job name')
+  parser.add_option('--cert', dest='CERTPATH',type='string' , default='' ,help='Grid certificate path')
+  parser.add_option('--args', dest='ARGS',type='string' , default='',help='PHSW.sh arguments')
+  parser.add_option('-e','--exe', dest='EXECUTABLE_PATH',type='string' , default='grid/PHSW.sh',help='Executable')
+  parser.add_option('--whitelist', dest='WHITELIST',type='string' , default='',help='White listed sites')
+  parser.add_option('--blacklist', dest='BLACKLIST',type='string' , default='',help='Black listed sites')
+
+  
+
+  global opt, args
+  (opt, args) = parser.parse_args()
+  
+  opt.DO_WHITELIST=False
+  opt.DO_BLACKLIST=False
+
+  #WHITE/BLACK LISTS
+  if opt.WHITELIST != '':
+    opt.DO_WHITELIST = True
+  if opt.BLACKLIST != '':
+    opt.DO_BLACKLIST = True
+
+  opt.USERNAME=pwd.getpwuid( os.getuid() )[ 0 ]
+
+  #JOB DIR
+  if not os.path.exists('jobs'):
+    os.mkdir('jobs')
+  opt.JOB_DIR=os.getcwd()+'/jobs/{0}_{1}'.format(opt.JOB_NAME,time.strftime("%m%d_%H-%M"))
+  opt.BIN_DIR=opt.JOB_DIR+'/bin'
+  opt.PEG_DIR=opt.JOB_DIR+'/pegasus'
+  opt.RUN_DIR='/local-scratch/{0}/pegasus_scratch/{1}_{2}'.format(opt.USERNAME,opt.JOB_NAME,time.strftime("%m%d_%H-%M"))
+  opt.OUT_DIR=opt.JOB_DIR+'/output'
+  os.makedirs(opt.JOB_DIR)
+  os.makedirs(opt.BIN_DIR)
+  os.makedirs(opt.PEG_DIR)
+  os.makedirs(opt.RUN_DIR)
+  os.makedirs(opt.OUT_DIR)
+
+  opt.EXECUTABLE = os.path.basename(opt.EXECUTABLE_PATH)
+  cmd='cp {0} {1}'.format(opt.EXECUTABLE_PATH,opt.BIN_DIR)
+  processCmd(cmd)
+  cmd='cp grid/pegasus/pegasusrc {0}'.format(opt.PEG_DIR)
+  processCmd(cmd)
+  cmd='cp grid/pegasus/submit {0}'.format(opt.PEG_DIR)
+  processCmd(cmd)
+  cmd='cp -r pack/* {0}'.format(opt.BIN_DIR)
+  processCmd(cmd)
+
+  #CERTIFICATE 
+  if opt.CERTPATH == "":
+    proc = subprocess.Popen(['voms-proxy-info','-path'], stdout=subprocess.PIPE)
+    tmp = proc.stdout.read().rstrip()
+    if os.path.exists(tmp):
+      opt.CERTPATH = tmp
+      opt.CERT = os.path.basename(opt.CERTPATH)
+      opt.ARGS += '-cert {0} -name {1}'.format(opt.CERT,opt.JOB_NAME)
+    else:
+      raise RuntimeError, "Certificate path {0} does not exist!".format(tmp)
+  else:
+    if os.path.exists(opt.CERTPATH):
+      opt.CERT = os.path.basename(opt.CERTPATH)
+      opt.ARGS += '-cert {0} -name {1}'.format(opt.CERT,opt.JOB_NAME)
+    else:
+      raise RuntimeError, "Certificate path {0} does not exist!".format(opt.CERTPATH)
+      
+    
+
+def processCmd(cmd):
+  status, output = commands.getstatusoutput(cmd)
+  if status !=0:
+    print 'Error in processing command:\n   ['+cmd+'] \nExiting...'
+    sys.exit()
+
+
+def writeDax():
+
+  base_dir = os.getcwd()
+  
+  # Create a abstract dag
+  dax = ADAG(opt.JOB_NAME)
+  
+  # notifcations on state changes for the dax
+  dax.invoke("on_error", "/usr/share/pegasus/notification/email")
+  
+  # Add executables to the DAX-level replica catalog
+  theExec = Executable(name=opt.EXECUTABLE, arch="x86_64", installed=False)
+  theExec.addPFN(PFN("file://{0}/{1}".format(opt.BIN_DIR,opt.EXECUTABLE), "local"))
+  dax.addExecutable(theExec)
+  
+  # adding input files
+  inputs_dir = base_dir + "/pack"
+  in_files = []
+  for in_name in os.listdir(inputs_dir):
+    in_file = File(in_name)
+    thePFN = "file://" + opt.BIN_DIR + "/" + in_name
+    theFN = opt.BIN_DIR+"/"+in_name
+    in_file.addPFN(PFN(thePFN, "local"))
+    dax.addFile(in_file)
+    in_files.append(in_file)
+    inputFilesLFN.append(in_name)
+    inputFilesPFN.append(thePFN)
+    inputFilesFN.append(theFN)
+
+
+  # Add jobs
+  for n in range(0,opt.NJOBS):
+    theJob = Job(name='{0}'.format(opt.EXECUTABLE),id='{0}_{1}'.format(opt.JOB_NAME,n))
+    theJob.addArguments(opt.ARGS)
+    theJob.uses(opt.CERT,link=Link.INPUT)
+    for i in in_files:
+      theJob.uses(i, link=Link.INPUT)
+    #out_file = File(in_name + ".out")
+    #theJob.uses(out_file, link=Link.OUTPUT)
+    dax.addJob(theJob)
+
+  # Write the DAX to stdout
+  f = open(opt.PEG_DIR+"/dax.xml", "w")
+  dax.writeXML(f)
+  f.close()
+
+  writeTC()
+  writeRC()
+
+
+def writeSiteCatalog():
+
+  f = open(opt.PEG_DIR+"/sites.xml","w")
+  f.write('<?xml version="1.0" encoding="UTF-8"?> \n')
+  f.write('<sitecatalog xmlns="http://pegasus.isi.edu/schema/sitecatalog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pegasus.isi.edu/schema/sitecatalog http://pegasus.isi.edu/schema/sc-4.0.xsd" version="4.0"> \n')
+  f.write('    <site  handle="local" arch="x86_64" os="LINUX"> \n')
+  f.write('        <directory type="shared-scratch" path="{0}"> \n'.format(opt.RUN_DIR))
+  f.write('            <file-server operation="all" url="file://{0}"/> \n'.format(opt.RUN_DIR))
+  f.write('        </directory>\n')
+  f.write('        <directory type="local-storage" path="{0}"> \n'.format(opt.OUT_DIR))
+  f.write('            <file-server operation="all" url="file://{0}"/> \n'.format(opt.OUT_DIR))
+  f.write('        </directory> \n')
+  f.write('    </site> \n')
+  f.write('    <site  handle="condorpool" arch="x86_64" os="LINUX"> \n')
+  f.write('        <profile namespace="pegasus" key="style" >condor</profile> \n')
+  f.write('        <profile namespace="condor" key="universe" >vanilla</profile> \n')
+
+  whiteList_list = opt.WHITELIST.split(',')
+  blackList_list = opt.BLACKLIST.split(',')
+
+  inputFiles = ""
+  for i in range(len(inputFilesFN)):
+    inputFiles += inputFilesFN[i]
+    if i+1 == len(inputFilesFN):
+      break
+    else:
+      inputFiles += ','
+  #f.write('        <profile namespace="condor" key="transfer_input_files">{0}</profile>\n'.format(inputFiles))
+  #f.write('        <profile namespace="condor" key="should_transfer_files">True</profile>\n')
+  #f.write('        <profile namespace="condor" key="when_to_transfer_output">ON_EXIT</profile>\n')
+  f.write('        <profile namespace="condor" key="+ProjectName" >"{0}"</profile> \n'.format('BNL-PHENIX'))
+  f.write('        <profile namespace="condor" key="+TransferOutput">""</profile>\n')
+  if opt.DO_WHITELIST:
+    theLine = ''
+    for i in range(len(whiteList_list)):
+      theLine += ' (GLIDEIN_ResourceName =?= "{0}") '.format(whiteList_list[i])
+      if (i+1 < len(whiteList_list)): theLine += '||'
+    if(len(whiteList_list) > 1):
+      f.write('        <profile namespace="condor" key="requirements">(CVMFS_oasis_opensciencegrid_org_REVISION &gt;= 3192) &amp;&amp; (HAS_PHSW =?= True) &amp;&amp; ( {0} )</profile>\n'.format(theLine))
+    else:
+      f.write('        <profile namespace="condor" key="requirements">(CVMFS_oasis_opensciencegrid_org_REVISION &gt;= 3192) &amp;&amp; (HAS_PHSW =?= True) &amp;&amp; {0} </profile>\n'.format(theLine))
+  elif opt.DO_BLACKLIST:
+    theLine = ''
+    for i in range(len(blackList_list)):
+      theLine += ' (GLIDEIN_ResourceName != "{0}" ) '.format(blackList_list[i])
+      if (i+1 < len(blackList_list)): theLine += '||'
+    f.write('        <profile namespace="condor" key="requirements">(CVMFS_oasis_opensciencegrid_org_REVISION &gt;= 3192) &amp;&amp; (HAS_PHSW =?= True) &amp;&amp; ( {0} )</profile>\n'.format(theLine))
+  else:
+    f.write('        <profile namespace="condor" key="requirements">(CVMFS_oasis_opensciencegrid_org_REVISION >= 3192) &amp;&amp; (HAS_PHSW =?= True)</profile>\n') #quotes issue
+  f.write('    </site> \n')
+  f.write('</sitecatalog> \n')
+  f.close()
+
+def writeTC():
+
+  f = open(opt.PEG_DIR+"/tc.dat","w")
+  f.write('# This is the transformation catalog. It lists information about each of the\n')
+  f.write('# executables that are used by the workflow.\n')
+  f.write('tr {0} {1}\n'.format(opt.EXECUTABLE,"{"))
+  f.write('     site local {0} \n'.format("{"))
+  f.write('        pfn "{0}/{1}"\n'.format(opt.BIN_DIR,opt.EXECUTABLE))
+  f.write('        arch "x86_64"\n')
+  f.write('        os "linux"\n')
+  f.write('        type "INSTALLED"')
+  f.write('     {0}\n'.format("}"))
+  f.write('{0}\n'.format("}"))
+  f.close()
+
+
+def writeRC():
+
+  f = open(opt.PEG_DIR+"/rc.dat","w")
+  f.write('# The format is:\n')
+  f.write('# LFN     PFN    pool="SITE"\n')
+  f.write('{0}  {1}  pool="local"\n'.format(opt.CERT,opt.CERTPATH))
+  for i in range(len(inputFilesLFN)):
+    f.write('{0}  {1}  pool="local"\n'.format(inputFilesLFN[i],inputFilesPFN[i]))
+  f.close()
+
+
+
+if __name__ == "__main__":
+
+  parseOptions()
+  writeDax()
+  writeSiteCatalog()
+
+  print "\n"
+  print "Created job directory {0} with {1} jobs. Go to {2} to submit.".format(opt.JOB_DIR,opt.NJOBS,opt.PEG_DIR)
+  print "\n"
