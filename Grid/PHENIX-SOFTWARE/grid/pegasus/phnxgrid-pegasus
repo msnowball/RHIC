@@ -10,6 +10,8 @@ inputFilesLFN = []
 inputFilesPFN = []
 inputFilesFN = []
 
+CVMFSRevision = 4263
+
 def parseOptions():
 
   usage = ('usage: %prog [options] \n'
@@ -21,6 +23,7 @@ def parseOptions():
   parser.add_option('-b', action='store_true', dest='noX', default=True ,help='no X11 windows')
   parser.add_option('-n','--njobs', dest='NJOBS',type='int' , default=10 ,help='Number of jobs')
   parser.add_option('-N','--name', dest='JOB_NAME',type='string' , default='test' ,help='Job name')
+  parser.add_option('-m','--mem', dest='MEM',type='int' , default=0 ,help='Memory requirements (default is 2000MB')
   parser.add_option('--cert', dest='CERTPATH',type='string' , default='' ,help='Grid certificate path')
   parser.add_option('--args', dest='ARGS',type='string' , default='',help='PHSW.sh arguments')
   parser.add_option('-e','--exe', dest='EXECUTABLE_PATH',type='string' , default='grid/PHSW.sh',help='Executable')
@@ -123,6 +126,8 @@ def writeDax():
     inputFilesFN.append(theFN)
 
 
+  ############ MODIFY TO SUIT NEEDS ###############
+
   # Add jobs
   for n in range(0,opt.NJOBS):
     theJob = Job(name='{0}'.format(opt.EXECUTABLE),id='{0}_{1}'.format(opt.JOB_NAME,n))
@@ -133,6 +138,9 @@ def writeDax():
     #out_file = File(in_name + ".out")
     #theJob.uses(out_file, link=Link.OUTPUT)
     dax.addJob(theJob)
+
+  #################################################
+
 
   # Write the DAX to stdout
   f = open(opt.PEG_DIR+"/dax.xml", "w")
@@ -159,6 +167,7 @@ def writeSiteCatalog():
   f.write('    <site  handle="condorpool" arch="x86_64" os="LINUX"> \n')
   f.write('        <profile namespace="pegasus" key="style" >condor</profile> \n')
   f.write('        <profile namespace="condor" key="universe" >vanilla</profile> \n')
+  if opt.MEM != 0: f.write('        <profile namespace="condor" key="request_memory" >{0}</profile> \n'.format(opt.MEM))
 
   whiteList_list = opt.WHITELIST.split(',')
   blackList_list = opt.BLACKLIST.split(',')
@@ -181,17 +190,17 @@ def writeSiteCatalog():
       theLine += ' (GLIDEIN_ResourceName =?= "{0}") '.format(whiteList_list[i])
       if (i+1 < len(whiteList_list)): theLine += '||'
     if(len(whiteList_list) > 1):
-      f.write('        <profile namespace="condor" key="requirements">(CVMFS_oasis_opensciencegrid_org_REVISION &gt;= 3192) &amp;&amp; (HAS_PHSW =?= True) &amp;&amp; ( {0} )</profile>\n'.format(theLine))
+      f.write('        <profile namespace="condor" key="requirements">(CVMFS_oasis_opensciencegrid_org_REVISION &gt;= {1}) &amp;&amp; (HAS_PHSW =?= True) &amp;&amp; ( {0} )</profile>\n'.format(theLine,CVMFSRevision))
     else:
-      f.write('        <profile namespace="condor" key="requirements">(CVMFS_oasis_opensciencegrid_org_REVISION &gt;= 3192) &amp;&amp; (HAS_PHSW =?= True) &amp;&amp; {0} </profile>\n'.format(theLine))
+      f.write('        <profile namespace="condor" key="requirements">(CVMFS_oasis_opensciencegrid_org_REVISION &gt;= {1}) &amp;&amp; (HAS_PHSW =?= True) &amp;&amp; {0} </profile>\n'.format(theLine,CVMFSRevision))
   elif opt.DO_BLACKLIST:
     theLine = ''
     for i in range(len(blackList_list)):
       theLine += ' (GLIDEIN_ResourceName != "{0}" ) '.format(blackList_list[i])
       if (i+1 < len(blackList_list)): theLine += '||'
-    f.write('        <profile namespace="condor" key="requirements">(CVMFS_oasis_opensciencegrid_org_REVISION &gt;= 3192) &amp;&amp; (HAS_PHSW =?= True) &amp;&amp; ( {0} )</profile>\n'.format(theLine))
+    f.write('        <profile namespace="condor" key="requirements">(CVMFS_oasis_opensciencegrid_org_REVISION &gt;= {1}) &amp;&amp; (HAS_PHSW =?= True) &amp;&amp; ( {0} )</profile>\n'.format(theLine,CVMFSRevision))
   else:
-    f.write('        <profile namespace="condor" key="requirements">(CVMFS_oasis_opensciencegrid_org_REVISION >= 3192) &amp;&amp; (HAS_PHSW =?= True)</profile>\n') #quotes issue
+    f.write('        <profile namespace="condor" key="requirements">(CVMFS_oasis_opensciencegrid_org_REVISION >= {0}) &amp;&amp; (HAS_PHSW =?= True)</profile>\n'.format(CVMFSRevision)) #quotes issue
   f.write('    </site> \n')
   f.write('</sitecatalog> \n')
   f.close()

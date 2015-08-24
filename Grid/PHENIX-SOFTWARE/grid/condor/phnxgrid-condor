@@ -21,13 +21,19 @@ exit
 fi
 
 SUBMIT=FALSE
-if [[ $1 == "-submit" ]]; then SUBMIT=TRUE; shift; fi
-if [[ $1 == "--submit" ]]; then SUBMIT=TRUE; shift; fi
-if [[ $1 == "-go" ]]; then SUBMIT=TRUE; shift; fi
-if [[ $1 == "--go" ]]; then SUBMIT=TRUE; shift; fi
-if [[ $1 == "-n" || $1 == "--njobs" ]]; then NNJOBS=$2; shift; shift; fi 
-if [[ $1 == "-N" || $1 == "--name" ]]; then JJOB_NAME=$2; shift; shift; fi 
+COUNTER=0
+while [ $# -gt 0 ]; do
+    if [[ $1 == "-submit" ]]; then SUBMIT=TRUE; shift; fi
+    if [[ $1 == "--submit" ]]; then SUBMIT=TRUE; shift; fi
+    if [[ $1 == "-go" ]]; then SUBMIT=TRUE; shift; fi
+    if [[ $1 == "--go" ]]; then SUBMIT=TRUE; shift; fi
+    if [[ $1 == "-n" || $1 == "--njobs" ]]; then NNJOBS=$2; shift; shift; fi 
+    if [[ $1 == "-N" || $1 == "--name" ]]; then JJOB_NAME=$2; shift; shift; fi 
+    
+    let COUNTER=$COUNTER+1
 
+    if [[ $COUNTER == 100 ]]; then echo "Unknown input! Use -h for help."; exit 1; fi
+done
 
 #############################################################################
 # RUN THIS IN THE PHSWBASE DIRECTORY
@@ -65,7 +71,8 @@ fi
 #CERT
 CERT_TIME_LEFT=`voms-proxy-info -timeleft`
 MAX_TIME=$(echo "$MAX_WALL_TIME*60*60" | bc)
-if [[ $CERT_TIME_LEFT < $MAX_TIME ]]; then 
+if [ $CERT_TIME_LEFT -lt $MAX_TIME ]; then
+    echo "MAX_TIME = $MAX_TIME and CERT_TIME_LEFT = $CERT_TIME_LEFT"
     echo "Please renew your certificate, not enough valid time left for jobs! (voms-proxy-init -hours 172)"
     exit
 fi
@@ -102,7 +109,7 @@ for (( N=1; N <= $NJOBS; N++ )); do
 universe        = vanilla
 
 # requirements is an expression to specify machines that can run jobs
-requirements    = (FileSystemDomain != "") && ((Arch == "INTEL") || (Arch == "X86_64")) && ((TARGET.GLIDEIN_ToRetire - time()) >= ($MAX_WALL_TIME*60*60)) && (CVMFS_oasis_opensciencegrid_org_REVISION >= 3192) && (HAS_PHSW == True)
+requirements    = (FileSystemDomain != "") && ((Arch == "INTEL") || (Arch == "X86_64")) && ((TARGET.GLIDEIN_ToRetire - time()) >= ($MAX_WALL_TIME*60*60)) && (CVMFS_oasis_opensciencegrid_org_REVISION >= 4263) && (HAS_PHSW == True)
 
 # make sure the job is being retried and rematched
 periodic_release = (NumJobStarts < $MAX_JOBS_RELEASED) && ((CurrentTime - EnteredCurrentStatus) > (60*60))

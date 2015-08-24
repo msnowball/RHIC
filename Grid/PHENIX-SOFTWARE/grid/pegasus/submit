@@ -1,23 +1,34 @@
 #!/bin/bash
 
+GIVEN_DIR=""
+if [[ $# > 0 ]]; then GIVEN_DIR=$1; fi
+
 set -e
 
 # generate the dax and site catalog
 export PYTHONPATH=`pegasus-config --python`
 
-EXISTS=FALSE
-i=1
-while [ $EXISTS == "FALSE" ]
-do
-    SUBMIT_DIR=submission_$i
-    if [ -d $SUBMIT_DIR ]; then 
-	let i=$i+1
-    else
-	mkdir -p $SUBMIT_DIR 
-	EXISTS=TRUE
-    fi
-done
+if [[ ! -z $GIVEN_DIR ]]; then
+    SUBMIT_DIR=$GIVEN_DIR
+    mkdir -p $SUBMIT_DIR
+else
+    EXISTS=FALSE
+    i=1
+    while [ $EXISTS == "FALSE" ]
+    do
+	SUBMIT_DIR=submission_$i
+	if [ -d $SUBMIT_DIR ]; then 
+	    let i=$i+1
+	else
+	    mkdir -p $SUBMIT_DIR 
+	    EXISTS=TRUE
+	fi
+    done
+fi
 
+echo 
+echo Submitting from $SUBMIT_DIR
+echo
 
 # plan and submit the  workflow
 pegasus-plan \

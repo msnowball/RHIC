@@ -1,21 +1,28 @@
 #!/bin/bash
 
+DEFAULT=ana.476
+G4VERSION=Geant4-10.0.2
+
+if [[ $# == 0 ]]; then
+        VERSION=$DEFAULT
+	else
+        VERSION=$1
+	fi
 
 #DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 DIR=/cvmfs/oasis.opensciencegrid.org/osg/projects/phenix/snowball/phnxsw/bin
 
-#echo $DIR
 
 export MAIN=$DIR/../
-export OFFLINE_MAIN=$DIR/../build/new.2
+export OFFLINE_MAIN=$DIR/../build/$VERSION
 export OPT_PHENIX=$DIR/../phenix/stow
 export THEROOTSYS=$OFFLINE_MAIN/root
 export G4_MAIN=$OFFLINE_MAIN/geant4
 export G4INSTALL=$G4_MAIN
-export G4SYSTEM=Geant4-10.0.2
+export G4SYSTEM=$G4VERSION
 export G4_VMC=$OFFLINE_MAIN/geant4_vmc
-export LHAPDF=$OPT_PHENIX/LHAPDF-6.1.3
-export LHAPATH=$LHAPDF/share/LHAPDF
+export LHAPDF=$OPT_PHENIX/lhapdf-5.8.9
+export LHAPATH=$LHAPDF/share/lhapdf/PDFsets
 export HEPMC=$OPT_PHENIX/HepMC
 export PYTHIA8=$OPT_PHENIX/pythia8180
 export PHOTOS=$OPT_PHENIX/PHOTOS
@@ -26,17 +33,17 @@ export USE_VGM=1
 export CLHEP_BASE_DIR=$OPT_PHENIX/CLHEP
 
 #G4 Data
-export G4ABLADATA=$G4_MAIN/share/Geant4-10.0.2/data/G4ABLA3.0
-export G4LEDATA=$G4_MAIN/share/Geant4-10.0.2/data/G4EMLOW6.35
-export G4NEUTRONHPDATA=$G4_MAIN/share/Geant4-10.0.2/data/G4NDL4.4
-export G4PIIDATA=$G4_MAIN/share/Geant4-10.0.2/data/G4PII1.3
-export G4REALSURFACEDATA=$G4_MAIN/share/Geant4-10.0.2/data/RealSurface1.0
-export G4LEVELGAMMADATA=$G4_MAIN/share/Geant4-10.0.2/data/PhotonEvaporation3.0
-export G4NEUTRONXSDATA=$G4_MAIN/share/Geant4-10.0.2/data/G4NEUTRONXS1.4
-export G4RADIOACTIVEDATA=$G4_MAIN/share/Geant4-10.0.2/data/RadioactiveDecay4.0
-export G4SAIDXSDATA=$G4_MAIN/share/Geant4-10.0.2/data/G4SAIDDATA1.1
+export G4ABLADATA=$G4_MAIN/share/$G4VERSION/data/G4ABLA3.0
+export G4LEDATA=$G4_MAIN/share/$G4VERSION/data/G4EMLOW6.35
+export G4NEUTRONHPDATA=$G4_MAIN/share/$G4VERSION/data/G4NDL4.4
+export G4PIIDATA=$G4_MAIN/share/$G4VERSION/data/G4PII1.3
+export G4REALSURFACEDATA=$G4_MAIN/share/$G4VERSION/data/RealSurface1.0
+export G4LEVELGAMMADATA=$G4_MAIN/share/$G4VERSION/data/PhotonEvaporation3.0
+export G4NEUTRONXSDATA=$G4_MAIN/share/$G4VERSION/data/G4NEUTRONXS1.4
+export G4RADIOACTIVEDATA=$G4_MAIN/share/$G4VERSION/data/RadioactiveDecay4.0
+export G4SAIDXSDATA=$G4_MAIN/share/$G4VERSION/data/G4SAIDDATA1.1
 
-export LD_LIBRARY_PATH=$G4_MAIN/lib #first time
+export LD_LIBRARY_PATH=$G4_MAIN/lib:$LD_LIBRARY_PATH #first time
 export LD_LIBRARY_PATH=$LHAPDF/lib:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=$EVTGEN/lib:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=$PHOTOS/lib:$LD_LIBRARY_PATH
@@ -57,7 +64,6 @@ export PATH=$OFFLINE_MAIN/bin:$PATH
 export PATH=$DIR:$PATH
 
 source $THEROOTSYS/bin/thisroot.sh
-
 
 
 export EXTRABIN=/home/snowball/public/PHENIX-SOFTWARE/bin

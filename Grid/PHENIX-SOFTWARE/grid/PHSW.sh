@@ -1,8 +1,5 @@
 #!/bin/bash
 
-#Setup the environment
-source /cvmfs/oasis.opensciencegrid.org/osg/projects/phenix/snowball/phnxsw/bin/set_grid_env.sh
-
 echo "-------------------------------------"
 echo "Submission command:"
 echo "PHSW.sh $@"
@@ -22,6 +19,11 @@ while [ $# -gt 0 ]; do
     let icounter=$icounter+1
 
 done
+
+function setupEnv()
+{
+    source /cvmfs/oasis.opensciencegrid.org/osg/projects/phenix/snowball/phnxsw/bin/set_grid_env.sh
+}
 
 
 function earlyexit()
@@ -219,8 +221,10 @@ function transfer()
     DIRECTION=""
     LOCAL=""
     REMOTE=""
-    SERVER="phnxgftp.rcf.bnl.gov"
-    OPT="-v -cd -rst -rst-retries 3 -rst-interval 60"
+    #SERVER="phnxgftp.rcf.bnl.gov"
+    SERVER="ceph003.usatlas.bnl.gov"
+    OPTTO="-v -cd -rst -rst-retries 3 -rst-interval 60"
+    OPTFROM="-v -rst -rst-retries 3 -rst-interval 60"
     COMMAND="globus"
 
     counter=0
@@ -243,10 +247,10 @@ function transfer()
  
     if [[ $COMMAND == "globus" ]]; then
 	if [[ $DIRECTION == "FROM" ]]; then
-	    cmd="globus-url-copy $OPT gsiftp://$SERVER:2811$REMOTE file://$PWD/$LOCAL"
+	    cmd="globus-url-copy $OPTFROM gsiftp://$SERVER:2811$REMOTE file://$PWD/$LOCAL"
 	fi
 	if [[ $DIRECTION == "TO" ]]; then
-	    cmd="globus-url-copy $OPT file://$PWD/$LOCAL gsiftp://$SERVER:2811$REMOTE"
+	    cmd="globus-url-copy $OPTTO file://$PWD/$LOCAL gsiftp://$SERVER:2811$REMOTE"
 	fi
     else 
 	echo "transfer() - these options are not implemented yet!"
@@ -288,6 +292,7 @@ function main()
 }
 
 #SEQUENCE
+setupEnv
 beginjob
 export NRand=`getRandSeed`
 #DEFAULT EXIT_CODE

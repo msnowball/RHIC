@@ -59,6 +59,8 @@ def prepareDir(dirName):
   processCmd(cmd)
   cmd = 'mkdir -p {0}'.format(dirName+'/include')
   processCmd(cmd)
+  cmd = 'mkdir -p {0}'.format(dirName+'/database')
+  processCmd(cmd)
   cmd = 'mkdir -p {0}'.format(dirName+'/bin')
   processCmd(cmd)
   cmd = 'mkdir -p {0}'.format(dirName+'/data')
@@ -71,6 +73,9 @@ def prepareDir(dirName):
     raise RuntimeError, "PHSW_GRID_DIR is empty!"
   cmd = 'cp -r {0}/* {1}/grid/'.format(gridDir,dirName)
   processCmd(cmd)
+  cmd = 'cp -r /home/snowball/public/PHENIX-SOFTWARE/database/* {0}/database'.format(dirName)
+  processCmd(cmd)
+
 
 
 def processCmd(cmd):
@@ -137,7 +142,9 @@ if __name__ == "__main__":
 
   if opt.PACK:
     compress('lib')
-    #compress('bin')
+    compress('bin')
+    compress('database')
+    compress('data')
   else:
     prepareDir(opt.JOB_NAME)
     
