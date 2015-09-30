@@ -5,7 +5,7 @@
 \usepackage{subfigure}
 \usepackage{multirow}
 \usepackage{avant}
-\usepackage[many]{tcolorbox}
+%\usepackage[many]{tcolorbox}
 \usepackage{varwidth}
 \usepackage{color}
 \usepackage{tikz}
@@ -24,10 +24,12 @@
 \newcommand{\C}{$C$ }
 \newcommand{\bb}{$b\bar{b}$ }
 \newcommand{\cc}{$c\bar{c}$ }
-\newcommand{\jpsi}{$J/\Psi$ }
+\newcommand{\jpsi}{$J/\psi$ }
 \newcommand{\pythia}{\texttt{PYTHIA} }
 \newcommand{\dcar}{$\rm{DCA}_{R}$ }
 \newcommand{\raa}{$R_{AA}$ }
+\newcommand{\fvtxz}{$z_{\rm FVTX}$ }
+
 
 \begin{document}
 
@@ -419,10 +421,11 @@ two \pythia events, the minimum bias event is required to have a renormalization
 with.  In real data, these are one event, however it is clear that \pythia does not get the multiplicity from the soft scattering and underlying event correct 
 with the hard scattering event alone. 
 
-Approximately 20\% of events in the Run 12 pp 510 GeV data have multiple collision vertices.  To account for this,
-20\% of the \jpsi events contain a second vertex. Figure \ref{fig:SecondaryVtx} shows the differences in X, Y, and Z between the primary vertex and the 
-secondary vertex in data (left) and simulation (right) for events with two or more vertices. 
-A comparison of the track multiplicity in data Monte Carlo is shown in figure \ref{fig:EventMultiplicity}.  
+%put additional subsubsection (Sanghoon) 
+%Approximately 20\% of events in the Run 12 pp 510 GeV data have multiple collision vertices.  To account for this,
+%20\% of the \jpsi events contain a second vertex. Figure \ref{fig:SecondaryVtx} shows the differences in X, Y, and Z between the primary vertex and the 
+%secondary vertex in data (left) and simulation (right) for events with two or more vertices. 
+%A comparison of the track multiplicity in data Monte Carlo is shown in figure \ref{fig:EventMultiplicity}.  
 
 
 %\begin{figure}[h]
@@ -458,8 +461,49 @@ When producing the Monte Carlo, a random run detector setup is picked according 
 The full simulation is then performed on that run for that job.  This is repeated across a large set of statistics so as to repeat the detector 
 setup across the full Run 12 pp dataset. Figure \ref{fig:DCAFromJPsi_Tuned} (left) shows the DCA distribution from simulated \jpsi events 
 after these tuning steps as compared with selected \jpsi events from data (right). 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Multiple collisions}
+Because of high luminosity duing 510 GeV pp run, there are some chances of multiple collisions in a single MB event. 
+For pp runs, FVTX vertex reconstruction module for tagging additional primary vertices is utilized.
+Figure~\ref{fig:FvtxZ_2nd} shows fraction of events including 2nd vertex to events of \fvtxz is within $\pm10~{\rm cm}$ as a function of BBC rate (left) and difference of \fvtxz between 1st and 2nd vertices. 
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.5\textwidth,angle=0]{figures/Fraction_2nd_vertex_BBCrate}
+\includegraphics[width=0.4\textwidth,angle=0]{figures/FvtxZ_diff_1st_2nd}
+\\ \caption{}
+\label{fig:FvtxZ_2nd}
+\end{center}
+\end{figure}
 
 
+The fraction of events including 2nd primary vertex is increasing as BBC rate goes high.
+Assuming there is no correlation between two collisions in a single beam crossing, the probability to successfully reconstruct 2nd vertex drops dramatically when location of two collisions is close ($<10~{\rm cm}$) as shown in the right plot of figure~\ref{fig:FvtxZ_2nd}.
+In this case, the reconstructed \fvtxz could be in between real positions of two collisions, and this would affect \dcar distributions.
+In order to deal with this problem, we also perform 2 vertices simulation, which introduce additional minimum bias event at random location, and combine with 1 vertex simulation.
+Figure~\ref{fig:FvtxZ_2nd} shows \dcar distributions of \jpsi simulation with 1 vertex and 2 vertices (BUT events of only 1 vertex is successfully reconstructed) at South (left) and North (right).
+There is a clear enhancement at large \dcar in case of two collisions are happend closely.
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.8\textwidth,angle=0]{figures/dca_r_1vtx_2vtx_1miss}
+\\ \caption{}
+\label{fig:FvtxZ_2nd}
+\end{center}
+\end{figure}
+
+In order to combine two simulations with correct ratio, we follow the estimation method from previous study for $W$ analysis~\cite{ref:an1103}. Based on the relation between multiple collision parameter ($\mu$) and BBC rates presented in the left plot of figure~\ref{fig:multi_collision}, we calculate the number of mean collisions per minimum bias event (at least one collision) for each BBC rate of Run12 pp run as shown in the right plot of figure~\ref{fig:multi_collision}. By taking account the fraction of collisions within $\pm20~{\rm cm}$ (36.3\%) from the $z_{\rm BBC}$ distribution of low BBC rate runs and integrated luminosity for each run in Run12 pp, we estimate 11.68\% of 2 collisions events, both events are in $|z|<20~{\rm cm}$ which is consistent with the simulation setup, in the entire Run12 pp minimum bias events.
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.4\textwidth,angle=0]{figures/multi_collision_par_BBC_rate}
+\includegraphics[width=0.4\textwidth,angle=0]{figures/mean_collision_per_BBC_rate}
+\\ \caption{}
+\label{fig:multi_collision}
+\end{center}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\begin{figure}[h]
 %\begin{center}
 %\includegraphics[width=0.7\textwidth,angle=0]{figures/}
@@ -882,6 +926,8 @@ of the \dcar centroid is shown in Figure \ref{fig:dca_phi_after_alignment}.
 
 \bibitem{ref:G4ROOT} G4ROOT
    {\it https://root.cern.ch/drupal/content/g4root}
+   
+\bibitem{ref:an1103} PHENIX analysis note 1103
 
 
 \end{thebibliography}
