@@ -477,7 +477,7 @@ Figure~\ref{fig:FvtxZ_2nd} shows fraction of events including 2nd vertex to even
 \begin{center}
 \includegraphics[width=0.5\textwidth,angle=0]{figures/Fraction_2nd_vertex_BBCrate}
 \includegraphics[width=0.4\textwidth,angle=0]{figures/FvtxZ_diff_1st_2nd}
-\\ \caption{}
+\\ \caption{Fraction of events having two reconstructed vertices (left) and the distribution of difference between two \fvtxz.}
 \label{fig:FvtxZ_2nd}
 \end{center}
 \end{figure}
@@ -493,21 +493,22 @@ There is a clear enhancement at large \dcar in case of two collisions are happen
 \begin{figure}[!h]
 \begin{center}
 \includegraphics[width=0.8\textwidth,angle=0]{figures/dca_r_1vtx_2vtx_1miss}
-\\ \caption{}
+\\ \caption{Comparion of \dcar distribution between \jpsi simulations with 1 vertex or 2 vertices (select only 1 vertex is reconstructed) at South (left) and North (right) arms.}
 \label{fig:dca_1vtx_2vtx}
 \end{center}
 \end{figure}
-
-In order to combine two simulations with correct ratio, we follow the estimation method from previous study for $W$ analysis~\cite{ref:an1103}. Based on the relation between multiple collision parameter ($\mu$) and BBC rates presented in the left plot of figure~\ref{fig:multi_collision}, we calculate the number of mean collisions per minimum bias event (at least one collision) for each BBC rate of Run12 pp run as shown in the right plot of figure~\ref{fig:multi_collision}. By taking account the fraction of collisions within $\pm20~{\rm cm}$ (36.3\%) from the $z_{\rm BBC}$ distribution of low BBC rate runs and integrated luminosity for each run in Run12 pp, we estimate 11.68\% of 2 collisions events, both events are in $|z|<20~{\rm cm}$ which is consistent with the simulation setup, in the entire Run12 pp minimum bias events.
 
 \begin{figure}[!h]
 \begin{center}
 \includegraphics[width=0.4\textwidth,angle=0]{figures/multi_collision_par_BBC_rate}
 \includegraphics[width=0.4\textwidth,angle=0]{figures/mean_collision_per_BBC_rate}
-\\ \caption{}
+\\ \caption{Relation between multiple collision parameter ($\mu$) and BBC rate (left) and estimated number of mean collisions (right).}
 \label{fig:multi_collision}
 \end{center}
 \end{figure}
+
+In order to combine two simulations with correct ratio, we follow the estimation method from previous study for $W$ analysis~\cite{ref:an1103}. Based on the relation between multiple collision parameter ($\mu$) and BBC rates presented in the left plot of figure~\ref{fig:multi_collision}, we calculate the number of mean collisions per minimum bias event (at least one collision) for each BBC rate of Run12 pp run as shown in the right plot of figure~\ref{fig:multi_collision}. By taking account the fraction of collisions within $\pm20~{\rm cm}$ (36.3\%) from the $Z_{\rm BBC}$ distribution of low BBC rate runs and integrated luminosity for each run in Run12 pp, we estimate 11.68\% of 2 collisions events, both events are in $|Z|<20~{\rm cm}$ which is consistent with the simulation setup, in the entire Run12 pp minimum bias events.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\begin{figure}[h]
@@ -579,21 +580,21 @@ A summary of all cuts applied for single muons and dimuons is listed in Table \r
         & Radial residual at FVTX st4 $\le$ &  9.1-1.7p+0.11$\rm{p}^{2}$ & 8.1-1.4p+0.09$\rm{p}^{2}$ \\
         & Azimuthal residual at FVTX st4 $\le$ &  0.4-0.08p+0.006$\rm{p}^{2}$ & 0.4-0.07p+0.005$\rm{p}^{2}$ \\
         & Polar residual at FVTX st4 $\le$ &  0.2-0.03p+0.002$\rm{p}^{2}$ & 0.2-0.04p+0.002$\rm{p}^{2}$ \\
-%    	\multicolumn{3}{c}{fiducial cuts (Sec.\ref{sec:fiducial cuts})} \\
-    	& $|\textrm{FVTX Z vertex}|$ &   \multicolumn{2}{c}{$<$ 10 cm} \\
-    	& FVTX Z vertex error      &   \multicolumn{2}{c}{ $<$ 400 $\mu$m} \\ 
+%    	\multicolumn{3}{c}{fiducial cuts (Sec.\ref{sec:fiducial cuts})} \\  	
    	& $\textrm{DCA}_{\phi}$ (3$\sigma$ cut) & \multicolumn{2}{c}{$<$ 3$\cdot$(0.6-0.05p+0.0015p$^{2}$) } \\ 
-   	& \multicolumn{3}{l}{Track should project to the FVTX primary vertex} \\ 	
+   	& \multicolumn{3}{l}{Track should project to the same FVTX primary vertex }\\
+   	& (either FVTX or FVTX\_SECOND) \\ 	
 	\hline
     	\multirow{2}{*}{Dimuon cuts} 
 	& Vertex projection $\chi^2$ & $<$ 3  & $<$ 3 \\
 %    	& \multicolumn{3}{l}{muon pair should not share same MuTr octant}\\
 %    	& asymmetry = $\frac{p1 - p2}{p1 + p2}$ & $<$ 0.6 & $<$ 0.6 \\
     	& 2.7 $<$ mass\footnote{as determined by MuTr track only} GeV/$\rm{c}^{2}$ $<$ 3.5 \\\hline
+    	\multirow{2}{*}{Event cuts} 
+	& $|\textrm{FVTX Z vertex}|$ &   \multicolumn{2}{c}{$<$ 10 cm} \\
+    	& FVTX Z vertex error      &   \multicolumn{2}{c}{ $<$ 400 $\mu$m} \\\hline
     \end{tabular}
 \end{table}
-
-
 
 \pagebreak
 \newpage
@@ -869,26 +870,26 @@ A comparison between \jpsi and \bjpsi events are shown in figure~\ref{fig:acceff
 
 \begin{figure}[!htb]
 	\includegraphics[width=1.0\textwidth]{Figures/Run12pp510_Jpsi_acc_eff}
-	\caption{}
+	\caption{Acceptance by efficiency for prompt \jpsi events}
 	\label{fig:Jpsi_acceff}
 \end{figure}
 
 \begin{figure}[!htb]
 	\includegraphics[width=1.0\textwidth]{Figures/Run12pp510_BJpsi_acc_eff}
-	\caption{}
+	\caption{Acceptance by efficiency for \bjpsi events}
 	\label{fig:BJpsi_acceff}
 \end{figure}
 
 \begin{figure}[!htb]
 	\includegraphics[width=1.0\textwidth]{Figures/Run12pp510_acc_eff_comparison}
-	\caption{}
+	\caption{Comparison of acceptance by efficiency between prompt \jpsi and \bjpsi}
 	\label{fig:acceff_comparison}
 \end{figure}
 
 \begin{figure}[!htb]
 \begin{center}
 	\includegraphics[width=0.8\textwidth]{Figures/Run12pp510_sim_FVTX_SVX_multiplicity}
-	\caption{}
+	\caption{Multiplicity distribution at South and North FVTX (left) and VTX (right).}
 	\label{fig:mulitplicity_sim}
 \end{center}
 \end{figure}
@@ -905,7 +906,6 @@ As discussed in section~\ref{sec:DCA}, \fvtxz reconstruction is largely affected
 \label{sec:SystErrors}
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}
 {\color{red}FIXME}
@@ -915,33 +915,33 @@ As discussed in section~\ref{sec:DCA}, \fvtxz reconstruction is largely affected
 
 \subsection{Good Run List}
 
-365306, 365313, 365330, 365339, 365340, 365342, 365343, 365499, 365500, 365501, 365506
-365513, 365532, 365537, 365538, 365539, 365543, 365544, 365546, 365547, 365551, 365662
-365663, 365671, 365672, 365673, 365675, 365680, 365703, 365711, 365713, 365714, 365718
-365720, 365721, 365723, 365727, 365729, 365841, 365842, 365843, 365845, 365848, 365853
-365854, 365855, 365862, 365863, 365889, 365890, 365891, 365894, 365896, 365897, 365899
-365901, 365902, 365904, 365906, 365912, 365914, 365915, 365916, 365918, 365919, 365922
-365923, 365927, 365928, 365929, 365931, 366033, 366034, 366035, 366036, 366039, 366040
-366041, 366042, 366053, 366054, 366060, 366426, 366427, 366428, 366440, 366586, 366587
-366602, 366632, 366635, 366636, 366637, 366669, 366703, 366788, 366789, 366790, 366793
-366794, 366795, 366796, 366897, 366898, 366899, 366900, 366901, 366902, 366904, 366907
-366910, 366975, 366976, 366977, 366978, 367033, 367034, 367035, 367036, 367037, 367038
-367039, 367062, 367067, 367076, 367099, 367134, 367159, 367161, 367162, 367165, 367166
-367232, 367233, 367234, 367236, 367237, 367238, 367239, 367313, 367316, 367318, 367319
-367320, 367321, 367322, 367323, 367324, 367329, 367330, 367331, 367335, 367336, 367338
-367340, 367341, 367342, 367343, 367345, 367448, 367449, 367450, 367451, 367452, 367453
-367454, 367462, 367463, 367465, 367466, 367467, 367468, 367471, 367510, 367511, 367512
-367513, 367538, 367539, 367543, 367545, 367546, 367548, 367549, 367550, 367552, 367553
-367593, 367594, 367596, 367597, 367598, 367600, 367601, 367602, 367603, 367607, 367608
-367610, 367611, 367612, 367614, 367617, 367620, 367659, 367660, 367662, 367663, 367664
-367665, 367716, 367718, 367720, 367723, 367726, 367727, 367728, 367735, 367737, 367919
-367921, 367923, 367925, 367926, 367927, 367928, 367929, 368037, 368038, 368039, 368040
-368042, 368181, 368183, 368184, 368185, 368186, 368190, 368194, 368206, 368212, 368213
-368217, 368218, 368219, 368223, 368279, 368280, 368338, 368339, 368341, 368344, 368346
-368347, 368356, 368357, 368358, 368359, 368360, 368361, 368364, 368366, 368367, 368368
-368390, 368391, 368393, 368394, 368395, 368407, 368408, 368409, 368410, 368529, 368532
-368533, 368535, 368544, 368545, 368546, 368547, 368621, 368622, 368623, 368624, 368627
-368628, 368629, 368630, 368683, 368686, 368687, 368689, 368690, 368692, 368694, 368695
+365306, 365313, 365330, 365339, 365340, 365342, 365343, 365499, 365500, 365501, 365506,
+365513, 365532, 365537, 365538, 365539, 365543, 365544, 365546, 365547, 365551, 365662,
+365663, 365671, 365672, 365673, 365675, 365680, 365703, 365711, 365713, 365714, 365718,
+365720, 365721, 365723, 365727, 365729, 365841, 365842, 365843, 365845, 365848, 365853,
+365854, 365855, 365862, 365863, 365889, 365890, 365891, 365894, 365896, 365897, 365899,
+365901, 365902, 365904, 365906, 365912, 365914, 365915, 365916, 365918, 365919, 365922,
+365923, 365927, 365928, 365929, 365931, 366033, 366034, 366035, 366036, 366039, 366040,
+366041, 366042, 366053, 366054, 366060, 366426, 366427, 366428, 366440, 366586, 366587,
+366602, 366632, 366635, 366636, 366637, 366669, 366703, 366788, 366789, 366790, 366793,
+366794, 366795, 366796, 366897, 366898, 366899, 366900, 366901, 366902, 366904, 366907,
+366910, 366975, 366976, 366977, 366978, 367033, 367034, 367035, 367036, 367037, 367038,
+367039, 367062, 367067, 367076, 367099, 367134, 367159, 367161, 367162, 367165, 367166,
+367232, 367233, 367234, 367236, 367237, 367238, 367239, 367313, 367316, 367318, 367319,
+367320, 367321, 367322, 367323, 367324, 367329, 367330, 367331, 367335, 367336, 367338,
+367340, 367341, 367342, 367343, 367345, 367448, 367449, 367450, 367451, 367452, 367453,
+367454, 367462, 367463, 367465, 367466, 367467, 367468, 367471, 367510, 367511, 367512,
+367513, 367538, 367539, 367543, 367545, 367546, 367548, 367549, 367550, 367552, 367553,
+367593, 367594, 367596, 367597, 367598, 367600, 367601, 367602, 367603, 367607, 367608,
+367610, 367611, 367612, 367614, 367617, 367620, 367659, 367660, 367662, 367663, 367664,
+367665, 367716, 367718, 367720, 367723, 367726, 367727, 367728, 367735, 367737, 367919,
+367921, 367923, 367925, 367926, 367927, 367928, 367929, 368037, 368038, 368039, 368040,
+368042, 368181, 368183, 368184, 368185, 368186, 368190, 368194, 368206, 368212, 368213,
+368217, 368218, 368219, 368223, 368279, 368280, 368338, 368339, 368341, 368344, 368346,
+368347, 368356, 368357, 368358, 368359, 368360, 368361, 368364, 368366, 368367, 368368,
+368390, 368391, 368393, 368394, 368395, 368407, 368408, 368409, 368410, 368529, 368532,
+368533, 368535, 368544, 368545, 368546, 368547, 368621, 368622, 368623, 368624, 368627,
+368628, 368629, 368630, 368683, 368686, 368687, 368689, 368690, 368692, 368694, 368695,
 368742, 368744, 368786, 368787, 368789, 368790, 368792, 368795, 368797, 368798
 
 
