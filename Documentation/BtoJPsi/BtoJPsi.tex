@@ -19,7 +19,7 @@
 \setcounter{bottomnumber}{300}
 \setcounter{totalnumber}{300}
 \newcommand{\PISA}{\textsf{PISA} }
-\newcommand{\pt}{$P_{t}$ }
+\newcommand{\pt}{$p_{T}$ }
 \newcommand{\B}{$B$ }
 \newcommand{\C}{$C$ }
 \newcommand{\bb}{$b\bar{b}$ }
@@ -28,7 +28,8 @@
 \newcommand{\pythia}{\texttt{PYTHIA} }
 \newcommand{\dcar}{$\rm{DCA}_{R}$ }
 \newcommand{\raa}{$R_{AA}$ }
-\newcommand{\fvtxz}{$z_{\rm FVTX}$ }
+\newcommand{\fvtxz}{$Z_{\rm FVTX}$ }
+\newcommand{\bjpsi}{${B} \to J/\psi$ }
 
 
 \begin{document}
@@ -195,6 +196,11 @@ nuclear cross sections and propagation code which will reduce these systematics 
 %%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Run 12 Data and QA Selection}
 {\color{red}FIXME}
+%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Missing beam center calibration}
+In pp runs, beam center position ($x$ and $y$) for each run is used for DCA calculation to get better DCA resolution (Details are shown at~\ref{sec:DCA}).
+Among 359 runs of pro. 104 production, 52 runs do not have a beam center position in the database due to bad detector condition of VTX and FVTX.
+These 52 runs are rejected to get consistent DCA resolution in the entire data set.
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{MuTr and MuID Performance}
@@ -467,7 +473,7 @@ Because of high luminosity duing 510 GeV pp run, there are some chances of multi
 For pp runs, FVTX vertex reconstruction module for tagging additional primary vertices is utilized.
 Figure~\ref{fig:FvtxZ_2nd} shows fraction of events including 2nd vertex to events of \fvtxz is within $\pm10~{\rm cm}$ as a function of BBC rate (left) and difference of \fvtxz between 1st and 2nd vertices. 
 
-\begin{figure}[h]
+\begin{figure}[!h]
 \begin{center}
 \includegraphics[width=0.5\textwidth,angle=0]{figures/Fraction_2nd_vertex_BBCrate}
 \includegraphics[width=0.4\textwidth,angle=0]{figures/FvtxZ_diff_1st_2nd}
@@ -481,20 +487,20 @@ The fraction of events including 2nd primary vertex is increasing as BBC rate go
 Assuming there is no correlation between two collisions in a single beam crossing, the probability to successfully reconstruct 2nd vertex drops dramatically when location of two collisions is close ($<10~{\rm cm}$) as shown in the right plot of figure~\ref{fig:FvtxZ_2nd}.
 In this case, the reconstructed \fvtxz could be in between real positions of two collisions, and this would affect \dcar distributions.
 In order to deal with this problem, we also perform 2 vertices simulation, which introduce additional minimum bias event at random location, and combine with 1 vertex simulation.
-Figure~\ref{fig:FvtxZ_2nd} shows \dcar distributions of \jpsi simulation with 1 vertex and 2 vertices (BUT events of only 1 vertex is successfully reconstructed) at South (left) and North (right).
+Figure~\ref{fig:dca_1vtx_2vtx} shows \dcar distributions of \jpsi simulation with 1 vertex and 2 vertices (BUT events of only 1 vertex is successfully reconstructed) at South (left) and North (right).
 There is a clear enhancement at large \dcar in case of two collisions are happend closely.
 
-\begin{figure}[h]
+\begin{figure}[!h]
 \begin{center}
 \includegraphics[width=0.8\textwidth,angle=0]{figures/dca_r_1vtx_2vtx_1miss}
 \\ \caption{}
-\label{fig:FvtxZ_2nd}
+\label{fig:dca_1vtx_2vtx}
 \end{center}
 \end{figure}
 
 In order to combine two simulations with correct ratio, we follow the estimation method from previous study for $W$ analysis~\cite{ref:an1103}. Based on the relation between multiple collision parameter ($\mu$) and BBC rates presented in the left plot of figure~\ref{fig:multi_collision}, we calculate the number of mean collisions per minimum bias event (at least one collision) for each BBC rate of Run12 pp run as shown in the right plot of figure~\ref{fig:multi_collision}. By taking account the fraction of collisions within $\pm20~{\rm cm}$ (36.3\%) from the $z_{\rm BBC}$ distribution of low BBC rate runs and integrated luminosity for each run in Run12 pp, we estimate 11.68\% of 2 collisions events, both events are in $|z|<20~{\rm cm}$ which is consistent with the simulation setup, in the entire Run12 pp minimum bias events.
 
-\begin{figure}[h]
+\begin{figure}[!h]
 \begin{center}
 \includegraphics[width=0.4\textwidth,angle=0]{figures/multi_collision_par_BBC_rate}
 \includegraphics[width=0.4\textwidth,angle=0]{figures/mean_collision_per_BBC_rate}
@@ -724,6 +730,8 @@ of the processing job which does not find a former event at the same category. T
 \noindent accounts for the relative track density of the sample analyzed. This normalization ranges between 1.02 to 1.05 depending on how long is the processing 
 job and sample used,  triggered data usually producing larger normalization corrections. The mismatch subtraction was tested in several distributions in embed simulation. A description of these tests is found is Section \ref{sec:mismatch_mc}.
 
+{\color{red} NEED TO PUT SWAP DISTRIBUTION FROM PP510}
+
 \pagebreak
 \newpage
 
@@ -843,6 +851,54 @@ of the \dcar centroid is shown in Figure \ref{fig:dca_phi_after_alignment}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Fit Procedure}
 \label{sec:Fit}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Acceptance by efficiency correction}
+\label{sec:accbyeff}
+For the final ratio calculation, we need to apply relative acceptance by efficiency between prompt \jpsi and \bjpsi events.
+\begin{equation}
+R_{corrected} = R_{measured}\cdot\frac{\varepsilon_{prompt~J/\psi\to\mu\mu}}{\varepsilon_{B\to J/\psi\to\mu\mu}}
+\end{equation}
+where $R$ is the ratio of \bjpsi to prompt \jpsi, and $\varepsilon$ is the acceptance by efficiency.
+By using simulation done to make sample distribution for the fit, acceptance by efficiencies for prompt \jpsi and \bjpsi are calculated.
+Figure~\ref{fig:Jpsi_acceff} shows acceptance by efficiency calculation for prompt \jpsi.
+The left and middle panels show generated (red) and reconstructed (black) dimuon's \pt distributions for South and North arm, and the right panel shows final efficiency.
+The reconstructed dimuons are passing all analysis cuts in table~\ref{tab:cuts}. 
+Figure~\ref{fig:BJpsi_acceff} shows same distributions for \bjpsi events.
+A comparison between \jpsi and \bjpsi events are shown in figure~\ref{fig:acceff_comparison}, and the ratio of efficiencies shown in the right panel is a correction factor for measured ratio from the fit.
+
+\begin{figure}[!htb]
+	\includegraphics[width=1.0\textwidth]{Figures/Run12pp510_Jpsi_acc_eff}
+	\caption{}
+	\label{fig:Jpsi_acceff}
+\end{figure}
+
+\begin{figure}[!htb]
+	\includegraphics[width=1.0\textwidth]{Figures/Run12pp510_BJpsi_acc_eff}
+	\caption{}
+	\label{fig:BJpsi_acceff}
+\end{figure}
+
+\begin{figure}[!htb]
+	\includegraphics[width=1.0\textwidth]{Figures/Run12pp510_acc_eff_comparison}
+	\caption{}
+	\label{fig:acceff_comparison}
+\end{figure}
+
+\begin{figure}[!htb]
+\begin{center}
+	\includegraphics[width=0.8\textwidth]{Figures/Run12pp510_sim_FVTX_SVX_multiplicity}
+	\caption{}
+	\label{fig:mulitplicity_sim}
+\end{center}
+\end{figure}
+
+Even though $J/\psi\to\mu\mu$ decay kinematics should be same between prompt \jpsi and \bjpsi, we observed quite different acceptance by efficiency numbers as shown on the right panel in Figure~\ref{fig:acceff_comparison}.
+From further investigations to figure out where the difference comes, the probability of \fvtxz reconstruction is 40\% (50\%) for prompt \jpsi (\bjpsi) events which could explain about 20\% difference.
+Figure~\ref{fig:mulitplicity_sim} shows multiplicity distributions in FVTX and VTX detectors for prompt \jpsi and \bjpsi events, and the average multiplicity in \bjpsi events is larger than that in prompt \jpsi events.
+Particularly on the multiplicity in VTX, there is larger fraction of zero-multiplicity events in prompt \jpsi simulation than \bjpsi simulation.
+As discussed in section~\ref{sec:DCA}, \fvtxz reconstruction is largely affected by VTX multiplicity, so the difference observed in acceptance by efficiency can be explained by multiplicity distributions.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Systematic Errors}
