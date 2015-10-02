@@ -30,6 +30,7 @@
 \newcommand{\raa}{$R_{AA}$ }
 \newcommand{\fvtxz}{$Z_{\rm FVTX}$ }
 \newcommand{\bjpsi}{${B} \to J/\psi$ }
+\newcommand{\pp}{$p$+$p$ }
 
 
 \begin{document}
@@ -731,6 +732,30 @@ of the processing job which does not find a former event at the same category. T
 \noindent accounts for the relative track density of the sample analyzed. This normalization ranges between 1.02 to 1.05 depending on how long is the processing 
 job and sample used,  triggered data usually producing larger normalization corrections. The mismatch subtraction was tested in several distributions in embed simulation. A description of these tests is found is Section \ref{sec:mismatch_mc}.
 
+{\color{red} PLEASE ADDRESS WITH THE DESCRIPTION FOR CUAU ABOVE\\}
+
+In case of mis-matched tracks, even through they come from real \jpsi, their \dcar distribution would be quite broader than tracks matching correct FVTX tracklet.
+Therefore, we need to consider this contribution in \dcar analysis.
+The best way to estimate the mis-matched component is taking swapped \dcar distribution of same muon tracks (\jpsi candidates) to be anlayzed in \dcar space.
+However, in current limited statistics, it is very hard to get stable swap distribution (expected to be $<10\%$ of muon tracks in \pp collisions) from muon tracks of \jpsi candidates.
+One idea to handle this problem is using swap distribution from Gap-3 stopped hadron tracks, which is similar prompt particles from event vertex, which correct normalization obtained from muon tracks of \jpsi\ candidates.
+
+\begin{figure}[!htb]
+	\includegraphics[width=1.0\textwidth]{Figures/Run12pp200_swapped_dca_r_gap4_pbin}
+	\caption{\label{fig:swap_gap4_fit} \dcar distributions of swapped tracks at Gap-4 for South ({\color{blue} top}) and North ({\color{red} bottom}) in different momentum bins.}
+\end{figure}
+
+\begin{figure}[!htb]
+\begin{center}
+	\includegraphics[width=0.8\textwidth]{Figures/Run12pp200_swapped_dca_r_gap4_sigma}
+	\caption{\label{fig:swap_gap4_fit_sigma} sigma of fit to \dcar distributions in figure~\ref{fig:swap_gap4_fit}.}
+\end{center}
+\end{figure}
+
+Figure~\ref{fig:swap_gap4_fit} shows \dcar distributions of FVTX-MuTr mis-matched tracks at Gap-4 for different momentum bins.
+Each shape is fit with dual gaussian function of same mean, and sigma distributions are shown in figure~\ref{fig:swap_gap4_fit_sigma}.
+Fit results are pretty consistent between South and North arms, and there is no large momentum dependence.
+Since the mis-matched track is a real muon track associated with accidentally mis-matched FVTX tracklet, the farely small momentum and arm dependences could be reasonable.
 {\color{red} NEED TO PUT SWAP DISTRIBUTION FROM PP510}
 
 \pagebreak
